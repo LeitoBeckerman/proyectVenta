@@ -1,6 +1,11 @@
 7791813888437
 7791813888437
 
+git add nombre_de_la_carpeta_o_archivo
+git commit -m "Añadir nuevas carpetas y archivos"
+git push origin main
+
+
 from ventas.models import Producto, PrecioProducto
 
 Token
