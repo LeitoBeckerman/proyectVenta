@@ -1,0 +1,87 @@
+.ventas-app {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    max-width: 600px;
+    margin: auto;
+  }
+  
+  form {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  
+  input {
+    padding: 5px;
+    margin-left: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  button {
+    padding: 10px 15px;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #218838;
+  }
+  .tabla-containersection {
+    width: 100%;
+    max-height: 300px; /* Ajusta la altura máxima según lo necesites */
+    overflow-y: auto; /* Agrega el scroll solo al cuerpo de la tabla */
+  }
+
+
+
+  .productos-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 3px solid #333;
+  }
+  
+
+  .productos-table th,
+  .productos-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+
+  .productos-table thead {
+    background-color: #00aae0; /* Color azul para el encabezado */
+    color: black;
+    position: sticky;
+    top: 0; /* Fija el encabezado en la parte superior */
+    z-index: 1; /* Asegura que el encabezado quede por encima del contenido */
+  }
+.productos-table th.cantidad-col,
+.productos-table td.cantidad-col {
+  width: 100px; /* Ajusta el valor según lo necesites */
+}
+
+/* Filas alternadas */
+.productos-table tbody tr:nth-child(odd) {
+    background-color: #f2f2f2; /* Color gris claro para filas impares */
+  }
+  
+  .productos-table tbody tr:nth-child(even) {
+    background-color: #cfcfcf; /* Color azul claro para filas pares */
+  }
+  
+  /* Efecto hover en filas */
+  .productos-table tbody tr:hover {
+    background-color: orange; /* Color más oscuro al pasar el ratón */
+  }
