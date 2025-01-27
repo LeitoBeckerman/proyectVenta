@@ -36,3 +36,9 @@
     transform: rotate(360deg);
   }
 }
+
+.main-content {
+  margin-left: 250px; /* Ajusta el valor a tu preferencia */
+  transition: margin-left 0.3s ease; /* Transición suave */
+  padding: 10px;
+}

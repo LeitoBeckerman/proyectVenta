@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import "./VentasApp.css"; // Agregar un archivo CSS específico para este componente.
 
+
+
 const VentasApp = () => {
   const [codigoProducto, setCodigoProducto] = useState("");
   const [cantidad, setCantidad] = useState(1);
@@ -66,7 +68,7 @@ const VentasApp = () => {
 
 
   return (
-    <div>
+    <div className="contenedor-principal">
       <form onSubmit={handleSubmit}>
         <label>
           Código del Producto:

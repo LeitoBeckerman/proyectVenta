@@ -1,0 +1,153 @@
+ /* Botón de hamburguesa */
+.menu-button {
+  font-size: 24px; /* Tamaño del ícono */
+  padding: 8px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: #333;
+  position: fixed; /* Para mantenerlo en la misma posición */
+  top: 16px;
+  left: 16px;
+ /* z-index: 1100;  Más alto que el menú */
+}
+
+/* Contenedor del menú */
+.menu-container {
+  position: fixed; /* Para que esté siempre visible y fijo */
+  top: 0;
+  left: 0;
+  width: 250px; /* Ancho del menú */
+  height: 100%; /* Altura completa de la ventana */
+  background-color: #333; /* Fondo oscuro */
+  color: white; /* Texto blanco */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5); /* Sombra lateral */
+  /*z-index: 1000;  Capa debajo del botón */
+  border-right: 2px solid #ddd; /* Agregar un borde al lado derecho del menú */
+  display: flex;
+  flex-direction: column; /* Alinear elementos verticalmente */
+  padding: 16px;
+  animation: slide-in 0.3s ease-out; /* Efecto de deslizamiento */
+}
+
+/* Efecto de deslizamiento */
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Cabecera del menú */
+.menu-header {
+  display: flex; /* Alinear elementos horizontalmente */
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #555; /* Línea divisoria */
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
+/* Botón de cierre */
+.close-button {
+  font-size: 24px; /* Tamaño de la "X" */
+  background: none;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* Lista de enlaces */
+.menu-list {
+  list-style: none; /* Sin viñetas */
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid #ddd; 
+}
+
+
+
+
+.menu-list li {
+  margin-bottom: 16px; /* Espacio entre enlaces */
+  
+}
+
+.menu-list a {
+  color: white; /* Color del texto */
+  text-decoration: none; /* Sin subrayado */
+  font-size: 18px; /* Tamaño del texto */
+  display: block; /* Asegura que todo el enlace sea clickeable */
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.menu-list a:hover {
+  background-color: #575757; /* Fondo al pasar el mouse */
+}
+
+.itemHome {
+  display: flex;           /* Activar Flexbox */
+  justify-content: space-between;  /* Alinear los elementos a los extremos */
+  align-items: center;     /* Centrar verticalmente */
+}
+
+.itemHome a {
+  display: flex;           /* También usar Flexbox en el enlace */
+  justify-content: space-between;  /* Asegurar que el texto y el icono estén separados */
+  align-items: center;     /* Centrar el texto y el icono verticalmente */
+  text-decoration: none;   /* Asegurarse de que no haya subrayado */
+  color: white;    
+  gap: 150px;  /* Ajusta el valor según cuánto quieras separarlos */        /* Cambiar el color del texto si es necesario */
+  width: 100%;                     /* Hace que el contenedor ocupe el ancho completo */
+               /* Espaciado entre los bordes del enlace */
+
+}
+
+.itemHome a svg {
+  font-size: 18px;  /* Ajusta el tamaño del icono para que coincida con el texto */
+}
+
+.itemContact {
+  display: flex;           /* Activar Flexbox */
+  justify-content: space-between;  /* Alinear los elementos a los extremos */
+  align-items: center;     /* Centrar verticalmente */
+}
+
+.itemContact a {
+  display: flex;           /* También usar Flexbox en el enlace */
+  justify-content: space-between;  /* Asegurar que el texto y el icono estén separados */
+  align-items: center;     /* Centrar el texto y el icono verticalmente */
+  text-decoration: none;   /* Asegurarse de que no haya subrayado */
+  color: white;    
+  gap: 150px;  /* Ajusta el valor según cuánto quieras separarlos */        /* Cambiar el color del texto si es necesario */
+  width: 100%;                     /* Hace que el contenedor ocupe el ancho completo */
+
+}
+.itemContact a svg {
+  font-size: 18px;  /* Ajusta el tamaño del icono para que coincida con el texto */
+}
+
+
+.itemVentas {
+  display: flex;           /* Activar Flexbox */
+  justify-content: space-between;  /* Alinear los elementos a los extremos */
+  align-items: center;     /* Centrar verticalmente */
+}
+
+.itemVentas a {
+  display: flex;           /* También usar Flexbox en el enlace */
+  justify-content: space-between;  /* Asegurar que el texto y el icono estén separados */
+  align-items: center;     /* Centrar el texto y el icono verticalmente */
+  text-decoration: none;   /* Asegurarse de que no haya subrayado */
+  color: white;    
+  gap: 150px;  /* Ajusta el valor según cuánto quieras separarlos */        /* Cambiar el color del texto si es necesario */
+  width: 100%;                     /* Hace que el contenedor ocupe el ancho completo */
+
+}
+.itemVentas a svg {
+  font-size: 18px;  /* Ajusta el tamaño del icono para que coincida con el texto */
+}
