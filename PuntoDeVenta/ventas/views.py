@@ -10,17 +10,15 @@ def ventas_view(request):
         try:
             data = json.loads(request.body)
             codigo_producto = data.get('codigo_producto')
-            cantidad = data.get('cantidad', 1)
-
+            cantidad = float(data.get('cantidad', 1))
+            print(f"Cantidad recibida: {cantidad}") 
             producto = Producto.objects.get(codigo=codigo_producto)
             precio_producto = PrecioProducto.objects.get(producto=producto)
 #precioProducto tiene la tabla precioProducto, pero el nombre de precio es monto
-            subtotal = float(precio_producto.monto) * int(cantidad)
 
             return JsonResponse({
                 'nombre_producto': producto.nombre,
                 'precio': precio_producto.monto,
-                'subtotal': subtotal
             })
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Datos JSON no válidos'}, status=400)
