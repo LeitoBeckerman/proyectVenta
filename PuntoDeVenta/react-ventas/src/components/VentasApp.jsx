@@ -3,72 +3,62 @@ import "./VentasApp.css"; // Agregar un archivo CSS específico para este compon
 
 const VentasApp = () => {
   const [codigoProducto, setCodigoProducto] = useState("");
-  const [cantidad, setCantidad] = useState(1);
+  const [cantidad, setCantidad] = useState("1"); // Ahora es string
   const [productos, setProductos] = useState([]); // Lista de productos agregados.
   const [totalVenta, setTotalVenta] = useState(0.0);
 
-  // Función para manejar el cambio de cantidad directamente en la tabla
+  // Función para manejar cambios en la cantidad
   const handleCantidadChange = (index, newCantidad) => {
-    // Quitar ceros iniciales pero permitir '0.000...' y números negativos
-    let cantidadLimpia = newCantidad.replace(/^(-?)0+(?=\d)/, '$1');
-    
-    // Validar y convertir a número
-    const cantidadValida = parseFloat(cantidadLimpia);
-    
-    // Si el resultado es NaN, establecemos a 0; de lo contrario, usamos el valor convertido
-    const cantidadFinal = isNaN(cantidadValida) ? 0 : cantidadValida;
-  
-    const newProductos = [...productos];
-    newProductos[index].cantidad = cantidadFinal;
-    newProductos[index].subtotal = newProductos[index].cantidad * newProductos[index].precio;
-  
-    // Actualizamos el producto en el estado
-    setProductos(newProductos);
-  
-    // Recalcular el total de la venta. Aquí asumimos que subtotal puede ser negativo si cantidad lo es.
-    const nuevoTotal = newProductos.reduce(
-      (acc, producto) => acc + producto.subtotal,
-      0
-    );
-    setTotalVenta(nuevoTotal);
+    // Validar con expresión regular (permite negativos y decimales)
+    if (/^-?\d*\.?\d*$/.test(newCantidad) || newCantidad === "") {
+      const newProductos = [...productos];
+      newProductos[index].cantidad = newCantidad;
+
+      // Recalcular subtotal si el valor no es vacío
+      const cantidadNumerica = parseFloat(newCantidad) || 0;
+      newProductos[index].subtotal = cantidadNumerica * newProductos[index].precio;
+
+      // Actualizar estado
+      setProductos(newProductos);
+
+      // Recalcular total
+      const nuevoTotal = newProductos.reduce(
+        (acc, producto) => acc + producto.subtotal,
+        0
+      );
+      setTotalVenta(nuevoTotal);
+    }
   };
 
   // Función para agregar un producto cuando se ingresa el código
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const csrfToken = window.csrfToken; // Usar la variable global configurada
-    if (!csrfToken) {
-      console.error("CSRF token not found!");
-      //return;
-    }
-
     fetch("http://localhost:8000", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken": csrfToken,
       },
-      body: JSON.stringify({ codigo_producto: codigoProducto, cantidad: parseFloat(cantidad.toFixed(3)) }),
+      body: JSON.stringify({
+        codigo_producto: codigoProducto,
+        cantidad: parseFloat(cantidad) || 0, // Convertir a número
+      }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
-          console.error("Error en respuesta del servidor:", data.error);
           alert(data.error);
         } else {
-          // Convertir valores numéricos y agregar el producto
-          const productoConValoresNumericos = {
+          const nuevoProducto = {
             ...data,
             codigo_producto: codigoProducto,
-            cantidad: parseFloat(cantidad.toFixed(3)), // Convertir cantidad a float
+            cantidad, // Mantener como string
             precio: parseFloat(data.precio),
-            subtotal: parseFloat(data.precio) * parseFloat(cantidad.toFixed(3)), // Calcular subtotal
+            subtotal: parseFloat(data.precio) * (parseFloat(cantidad) || 0),
           };
 
-          // Agregar el nuevo producto a la lista de productos y actualizar el total
           setProductos((prevProductos) => {
-            const nuevosProductos = [...prevProductos, productoConValoresNumericos];
+            const nuevosProductos = [...prevProductos, nuevoProducto];
             const nuevoTotal = nuevosProductos.reduce(
               (acc, producto) => acc + producto.subtotal,
               0
@@ -79,7 +69,7 @@ const VentasApp = () => {
 
           // Limpiar los campos de entrada
           setCodigoProducto("");
-          setCantidad(1);
+          setCantidad("1"); // Mantener como string
         }
       })
       .catch((error) => console.error("Error en la solicitud:", error));
@@ -101,11 +91,14 @@ const VentasApp = () => {
         <label>
           Cantidad:
           <input
-            type="number"
-            //step="0.005"
+            type="text"
             value={cantidad}
-            onChange={(e) => setCantidad(parseFloat(e.target.value) )}
-            
+            onChange={(e) => {
+              const value = e.target.value;
+              if (/^-?\d*\.?\d*$/.test(value) || value === "") {
+                setCantidad(value);
+              }
+            }}
             required
           />
         </label>
@@ -130,10 +123,9 @@ const VentasApp = () => {
                 <td>{producto.codigo_producto}</td>
                 <td className="cantidad-col">
                   <input
-                    type="number"
-                    value={producto.cantidad !== null ? producto.cantidad.toString().replace(/^(-?)0+(?=\d)/, '$1') : '0'}
+                    type="text"
+                    value={producto.cantidad}
                     onChange={(e) => handleCantidadChange(index, e.target.value)}
-                
                   />
                 </td>
                 <td>{producto.nombre_producto}</td>
