@@ -25,71 +25,93 @@ input[type="number"]::-webkit-outer-spin-button {
 
 
 
-  label {
-    display: block;
-    margin-bottom: 10px;
-    font-weight: bold;
-  }
-  
-  input {
-    padding: 5px;
-    margin-left: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  button {
-  
-    padding: 10px 15px;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
+label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
 
-    border: 1px solid rgba(0, 0, 0, 0.3);
-    color: black;
-    text-align: center;
-    text-decoration: none;
-    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
-  }
-  
-  button:hover {
-    background-color: lightblue;
-  }
-  .tabla-containersection {
-    width: 100%;
-    max-height: 300px; /* Ajusta la altura máxima según lo necesites */
-    overflow-y: auto; /* Agrega el scroll solo al cuerpo de la tabla */
-  }
+input {
+  padding: 5px;
+  margin-left: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+
+  padding: 10px 15px;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  color: black;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+  background-color: lightblue;
+}
+.tabla-containersection {
+  width: 100%;
+  max-height: 300px; /* Ajusta la altura máxima según lo necesites */
+  overflow-y: auto; /* Agrega el scroll solo al cuerpo de la tabla */
+}
 
 
 
-  .productos-table {
-    width: 100%;
-    border-collapse: collapse;
-    border: 3px solid #333;
-  }
-  
+.productos-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 3px solid #333;
+  table-layout: auto;
+}
 
-  .productos-table th,
-  .productos-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-  
 
-  .productos-table thead {
-    background-color: #00aae0; /* Color azul para el encabezado */
-    color: black;
-    position: sticky;
-    top: 0; /* Fija el encabezado en la parte superior */
-    z-index: 1; /* Asegura que el encabezado quede por encima del contenido */
-  }
+.productos-table th,
+.productos-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+
+}
+
+
+.productos-table thead {
+  background-color: black; /* Color azul para el encabezado */
+  color: white;
+  position: sticky;
+  top: 0; /* Fija el encabezado en la parte superior */
+  z-index: 1; /* Asegura que el encabezado quede por encima del contenido */
+}
 .productos-table th.cantidad-col,
 .productos-table td.cantidad-col {
-  width: 100px; /* Ajusta el valor según lo necesites */
+  width: auto; /* Ajusta el valor según lo necesites */
 }
+
+.input-cantidad {
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  font-size: 16px;
+  width: 100px; /* Ajusta el ancho a tus necesidades */
+  text-align: center; /* Centra el texto dentro del input */
+}
+
+.input-cantidad:focus {
+  border-color: black; /* Cambia el color de borde cuando está enfocado */
+  outline: none; /* Elimina el contorno por defecto del navegador */
+  border: 2px solid;
+}
+
+
+
+
+
 
 /* Filas alternadas */
 .productos-table tbody tr:nth-child(odd) {
@@ -104,3 +126,38 @@ input[type="number"]::-webkit-outer-spin-button {
   .productos-table tbody tr:hover {
     background-color: orange; /* Color más oscuro al pasar el ratón */
   }
+
+  .boton-container {
+    
+    justify-content: center; /* Centra el botón */
+    margin-top: 40px;
+  }
+  
+  .boton-eliminar {
+    padding: 10px 20px; /* Ajusta el padding para hacerlo más pequeño */
+    font-size: 16px; /* Tamaño de fuente */
+    background-color: #f44336; /* Color de fondo */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .boton-eliminar:disabled {
+    background-color: #dcdcdc; /* Color gris cuando está deshabilitado */
+    cursor: not-allowed;
+  }
+  
+  .boton-eliminar:hover {
+    background-color: #e53935; /* Efecto hover */
+  }
+
+
+/* Estilo para la fila seleccionada */
+.productos-table tbody tr.seleccionado {
+  background-color: #35a0ee; /* Asegúrate de que tenga alta prioridad */
+  color: black; /* Asegúrate de que el texto sea visible */
+  cursor: pointer;
+  font-weight: 530;
+}

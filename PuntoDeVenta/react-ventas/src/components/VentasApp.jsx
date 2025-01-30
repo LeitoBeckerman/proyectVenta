@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import "./VentasApp.css"; // Agregar un archivo CSS específico para este componente.
+import { agregarProducto } from "../utils/productosService.js"; // Importamos desde el nuevo archivo
+
 
 const VentasApp = () => {
   const [codigoProducto, setCodigoProducto] = useState("");
   const [cantidad, setCantidad] = useState("1"); // Ahora es string
   const [productos, setProductos] = useState([]); // Lista de productos agregados.
   const [totalVenta, setTotalVenta] = useState(0.0);
+  const [filaSeleccionada, setFilaSeleccionada] = useState(null);
+
 
   // Función para manejar cambios en la cantidad
   const handleCantidadChange = (index, newCantidad) => {
@@ -31,48 +35,31 @@ const VentasApp = () => {
   };
 
   // Función para agregar un producto cuando se ingresa el código
-  const handleSubmit = (event) => {
-    event.preventDefault();
+    // Función para manejar el envío del formulario
+    const handleSubmit = (event) => {
+      event.preventDefault();
+      agregarProducto(codigoProducto, cantidad, setProductos, setTotalVenta, setCodigoProducto, setCantidad);
+    };
 
-    fetch("http://localhost:8000", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        codigo_producto: codigoProducto,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.error) {
-          alert(data.error);
-        } else {
-          const nuevoProducto = {
-            ...data,
-            codigo_producto: codigoProducto,
-            cantidad, // Mantener como string
-            precio: parseFloat(data.precio),
-            subtotal: parseFloat(data.precio) * (parseFloat(cantidad) || 0),
-          };
-
-          setProductos((prevProductos) => {
-            const nuevosProductos = [...prevProductos, nuevoProducto];
-            const nuevoTotal = nuevosProductos.reduce(
-              (acc, producto) => acc + producto.subtotal,
-              0
-            );
-            setTotalVenta(nuevoTotal);
-            return nuevosProductos;
-          });
-
-          // Limpiar los campos de entrada
-          setCodigoProducto("");
-          setCantidad("1"); // Mantener como string
-        }
-      })
-      .catch((error) => console.error("Error en la solicitud:", error));
-  };
+    const handleEliminarProducto = () => {
+      if (filaSeleccionada !== null) {
+        setProductos((prevProductos) => {
+          const nuevosProductos = prevProductos.filter((_, i) => i !== filaSeleccionada);
+    
+          // Recalcular total
+          const nuevoTotal = nuevosProductos.reduce(
+            (acc, producto) => acc + producto.subtotal,
+            0
+          );
+          setTotalVenta(nuevoTotal);
+          return nuevosProductos;
+        });
+    
+        // Limpiar la selección
+        setFilaSeleccionada(null);
+      }
+    };
+    
 
   return (
     <div className="contenedor-principal">
@@ -105,6 +92,19 @@ const VentasApp = () => {
         <button type="submit">Agregar</button>
       </form>
 
+      <div className="boton-container">
+        {/* Botón para eliminar el producto seleccionado */}
+        <button 
+          className="boton-eliminar"
+          type="button"  
+          onClick={handleEliminarProducto} 
+          disabled={filaSeleccionada === null}
+        >
+          Eliminar
+        </button>
+      </div>
+
+
       <section className="tabla-containersection">
         <table className="productos-table">
           <thead>
@@ -118,13 +118,18 @@ const VentasApp = () => {
           </thead>
           <tbody>
             {productos.map((producto, index) => (
-              <tr key={index}>
+              <tr key={index}
+        
+              className={filaSeleccionada === index ? "seleccionado" : ""}
+              onClick={() => setFilaSeleccionada(index)} // Seleccionar fila al hacer clic
+              >
                 <td>{producto.codigo_producto}</td>
                 <td className="cantidad-col">
-                  <input
+                  <input 
                     type="text"
                     value={producto.cantidad}
                     onChange={(e) => handleCantidadChange(index, e.target.value)}
+                    className="input-cantidad"
                   />
                 </td>
                 <td>{producto.nombre_producto}</td>
@@ -139,6 +144,10 @@ const VentasApp = () => {
       <div>
         <h3>TOTAL VENTA: ${totalVenta.toFixed(2)}</h3>
       </div>
+      
+
+
+
     </div>
   );
 };
