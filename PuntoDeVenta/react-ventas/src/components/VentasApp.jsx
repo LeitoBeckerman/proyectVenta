@@ -41,7 +41,6 @@ const VentasApp = () => {
       },
       body: JSON.stringify({
         codigo_producto: codigoProducto,
-        cantidad: parseFloat(cantidad) || 0, // Convertir a número
       }),
     })
       .then((response) => response.json())
@@ -77,7 +76,7 @@ const VentasApp = () => {
 
   return (
     <div className="contenedor-principal">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}> 
         <label>
           Código del Producto:
           <input

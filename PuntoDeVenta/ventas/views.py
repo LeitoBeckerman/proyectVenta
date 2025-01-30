@@ -10,8 +10,6 @@ def ventas_view(request):
         try:
             data = json.loads(request.body)
             codigo_producto = data.get('codigo_producto')
-            cantidad = float(data.get('cantidad', 1))
-            print(f"Cantidad recibida: {cantidad}") 
             producto = Producto.objects.get(codigo=codigo_producto)
             precio_producto = PrecioProducto.objects.get(producto=producto)
 #precioProducto tiene la tabla precioProducto, pero el nombre de precio es monto
