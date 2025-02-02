@@ -1,5 +1,7 @@
 7791813888437
 7791813888437
+C:\Users\leobe\OneDrive\Escritorio\LeandroBeckerman\PuntoDeVentaProjec\PuntoDeVenta\react-ventas>npm run start-https
+
 
 git add nombre_de_la_carpeta_o_archivo
 git commit -m "Añadir nuevas carpetas y archivos"

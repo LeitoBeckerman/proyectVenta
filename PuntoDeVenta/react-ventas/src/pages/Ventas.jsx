@@ -11,12 +11,17 @@ const Ventas = () => {
 
   return (
     <div>
-      <h1>Pagina de VENTAS</h1>
-      <button onClick={iniciarVentas}>Iniciar Ventas APP</button>
+      <h1>VENTAS Caja Express</h1>
 
-      {mostrarVentasApp && <VentasApp />} {/* Mostrar VentasApp si mostrarVentasApp es true */}
+      {/* Mostrar el botón solo si mostrarVentasApp es false */}
+      {!mostrarVentasApp && (
+        <button onClick={iniciarVentas}>Iniciar Ventas APP</button>
+      )}
+
+      {/* Mostrar VentasApp si mostrarVentasApp es true */}
+      {mostrarVentasApp && <VentasApp />}
     </div>
   );
 };
-
 export default Ventas;
+

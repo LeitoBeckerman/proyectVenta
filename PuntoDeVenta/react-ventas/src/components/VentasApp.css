@@ -8,7 +8,11 @@
 
   .contenedor-principal {
     display: flex;
-    min-height: 100vh; /* Altura igual a la ventana del navegador */
+    flex-direction: column; /* Apila los elementos verticalmente */
+    align-items: center; /* Centra los elementos horizontalmente */
+    min-height: 100vh;
+    padding: 20px; /* Espaciado interno */
+    box-sizing: border-box; /* Incluye el padding en el ancho y alto */
   }
   
   form {
@@ -160,4 +164,17 @@ button:hover {
   color: black; /* Asegúrate de que el texto sea visible */
   cursor: pointer;
   font-weight: 530;
+}
+
+.boton-escanear {
+  padding: 10px 15px; /* Ajusta el padding para hacerlo más pequeño */
+  color: black;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  border-radius: 4px;
+  cursor: pointer;
+
+
 }

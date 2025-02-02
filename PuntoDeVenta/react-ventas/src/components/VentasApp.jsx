@@ -1,31 +1,57 @@
-import React, { useState } from "react";
-import "./VentasApp.css"; // Agregar un archivo CSS específico para este componente.
-import { agregarProducto } from "../utils/productosService.js"; // Importamos desde el nuevo archivo
-
+import React, { useState, useEffect } from "react";
+import "./VentasApp.css";
+import { agregarProducto } from "../utils/productosService.js";
+import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from "html5-qrcode";
 
 const VentasApp = () => {
   const [codigoProducto, setCodigoProducto] = useState("");
-  const [cantidad, setCantidad] = useState("1"); // Ahora es string
-  const [productos, setProductos] = useState([]); // Lista de productos agregados.
+  const [cantidad, setCantidad] = useState("1");
+  const [productos, setProductos] = useState([]);
   const [totalVenta, setTotalVenta] = useState(0.0);
   const [filaSeleccionada, setFilaSeleccionada] = useState(null);
 
+  // Función para manejar el escaneo de código de barras
+  const iniciarEscaneo = () => {
+    const scanner = new Html5QrcodeScanner(
+      "reader",
+      {
+        qrbox: { width: 300, height: 300 },
+        fps: 10,
+        formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13], // Solo escanear EAN-13
+      },
+      false
+    );
+  
+    scanner.render(
+      (codigoEscaneado) => {
+        console.log("Código escaneado:", codigoEscaneado);
+        
+        // Reproducir sonido
+        const beep = new Audio("/beep.mp3"); // Asegúrate de que el archivo esté en 'public/'
+        beep.play().catch(error => console.error("Error al reproducir beep:", error));
+  
+        setCodigoProducto(codigoEscaneado);
+        scanner.clear();
+        document.getElementById("reader").innerHTML = "";
+      },
+      (error) => {
+        console.error("Error al escanear:", error);
+      }
+    );
+  };
+  
 
   // Función para manejar cambios en la cantidad
   const handleCantidadChange = (index, newCantidad) => {
-    // Validar con expresión regular (permite negativos y decimales)
     if (/^-?\d*\.?\d*$/.test(newCantidad) || newCantidad === "") {
       const newProductos = [...productos];
       newProductos[index].cantidad = newCantidad;
 
-      // Recalcular subtotal si el valor no es vacío
       const cantidadNumerica = parseFloat(newCantidad) || 0;
       newProductos[index].subtotal = cantidadNumerica * newProductos[index].precio;
 
-      // Actualizar estado
       setProductos(newProductos);
 
-      // Recalcular total
       const nuevoTotal = newProductos.reduce(
         (acc, producto) => acc + producto.subtotal,
         0
@@ -34,36 +60,32 @@ const VentasApp = () => {
     }
   };
 
-  // Función para agregar un producto cuando se ingresa el código
-    // Función para manejar el envío del formulario
-    const handleSubmit = (event) => {
-      event.preventDefault();
-      agregarProducto(codigoProducto, cantidad, setProductos, setTotalVenta, setCodigoProducto, setCantidad);
-    };
+  // Función para manejar el envío del formulario
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    //alert("codigo ingresado: "+ codigoProducto );
+    agregarProducto(codigoProducto, cantidad, setProductos, setTotalVenta, setCodigoProducto, setCantidad);
+  };
 
-    const handleEliminarProducto = () => {
-      if (filaSeleccionada !== null) {
-        setProductos((prevProductos) => {
-          const nuevosProductos = prevProductos.filter((_, i) => i !== filaSeleccionada);
-    
-          // Recalcular total
-          const nuevoTotal = nuevosProductos.reduce(
-            (acc, producto) => acc + producto.subtotal,
-            0
-          );
-          setTotalVenta(nuevoTotal);
-          return nuevosProductos;
-        });
-    
-        // Limpiar la selección
-        setFilaSeleccionada(null);
-      }
-    };
-    
+  // Función para eliminar un producto
+  const handleEliminarProducto = () => {
+    if (filaSeleccionada !== null) {
+      setProductos((prevProductos) => {
+        const nuevosProductos = prevProductos.filter((_, i) => i !== filaSeleccionada);
+        const nuevoTotal = nuevosProductos.reduce(
+          (acc, producto) => acc + producto.subtotal,
+          0
+        );
+        setTotalVenta(nuevoTotal);
+        return nuevosProductos;
+      });
+      setFilaSeleccionada(null);
+    }
+  };
 
   return (
     <div className="contenedor-principal">
-      <form onSubmit={handleSubmit}> 
+      <form onSubmit={handleSubmit}>
         <label>
           Código del Producto:
           <input
@@ -89,21 +111,27 @@ const VentasApp = () => {
           />
         </label>
         <br />
+       
         <button type="submit">Agregar</button>
+       
       </form>
 
+      {/* Botón para iniciar el escaneo de código de barras */}
+      <button className="boton-escanear" onClick={iniciarEscaneo}>Escanear Código de Barras</button>
+
+      {/* Contenedor para mostrar la cámara */}
+      <div id="reader"></div>
+
       <div className="boton-container">
-        {/* Botón para eliminar el producto seleccionado */}
-        <button 
+        <button
           className="boton-eliminar"
-          type="button"  
-          onClick={handleEliminarProducto} 
+          type="button"
+          onClick={handleEliminarProducto}
           disabled={filaSeleccionada === null}
         >
           Eliminar
         </button>
       </div>
-
 
       <section className="tabla-containersection">
         <table className="productos-table">
@@ -118,14 +146,14 @@ const VentasApp = () => {
           </thead>
           <tbody>
             {productos.map((producto, index) => (
-              <tr key={index}
-        
-              className={filaSeleccionada === index ? "seleccionado" : ""}
-              onClick={() => setFilaSeleccionada(index)} // Seleccionar fila al hacer clic
+              <tr
+                key={index}
+                className={filaSeleccionada === index ? "seleccionado" : ""}
+                onClick={() => setFilaSeleccionada(index)}
               >
                 <td>{producto.codigo_producto}</td>
                 <td className="cantidad-col">
-                  <input 
+                  <input
                     type="text"
                     value={producto.cantidad}
                     onChange={(e) => handleCantidadChange(index, e.target.value)}
@@ -144,10 +172,6 @@ const VentasApp = () => {
       <div>
         <h3>TOTAL VENTA: ${totalVenta.toFixed(2)}</h3>
       </div>
-      
-
-
-
     </div>
   );
 };
