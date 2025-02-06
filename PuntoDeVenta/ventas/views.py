@@ -10,7 +10,13 @@ def ventas_view(request):
         try:
             data = json.loads(request.body)
             codigo_producto = data.get('codigo_producto')
+             # Validar que el código de producto no esté vacío
+            if not codigo_producto:
+                return JsonResponse({'error': 'El código de producto es requerido', 'codigo_producto': None}, status=400)
+
+            #buscar el producto
             producto = Producto.objects.get(codigo=codigo_producto)
+            #buscar el precio del producto
             precio_producto = PrecioProducto.objects.get(producto=producto)
 #precioProducto tiene la tabla precioProducto, pero el nombre de precio es monto
 

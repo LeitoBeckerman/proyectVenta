@@ -61,14 +61,33 @@ const VentasApp = () => {
   };
 
   // Función para manejar el envío del formulario
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    //alert("codigo ingresado: "+ codigoProducto );
-    agregarProducto(codigoProducto, cantidad, setProductos, setTotalVenta, setCodigoProducto, setCantidad);
+    try {
+      const resultado = await agregarProducto(
+        codigoProducto, 
+        cantidad, 
+        setProductos, 
+        setTotalVenta, 
+        setCodigoProducto, 
+        setCantidad
+      );
+      if (!resultado) {
+        console.log("El producto no se agrega porque es inválido.");
+        return;
+      }
+
+    } catch (error) {
+      console.error("Error al agregar producto:", error);
+      alert("Hubo un error al agregar el producto.");
+    }
   };
 
+  
+
+
   // Función para eliminar un producto
-  const handleEliminarProducto = () => {
+  function handleEliminarProducto() {
     if (filaSeleccionada !== null) {
       setProductos((prevProductos) => {
         const nuevosProductos = prevProductos.filter((_, i) => i !== filaSeleccionada);
@@ -81,11 +100,11 @@ const VentasApp = () => {
       });
       setFilaSeleccionada(null);
     }
-  };
+  }
 
   return (
     <div className="contenedor-principal">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit=  {handleSubmit}>
         <label>
           Código del Producto:
           <input
