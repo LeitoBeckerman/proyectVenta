@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef} from "react";
 import "./VentasApp.css";
 import { agregarProducto } from "../utils/productosService.js";
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from "html5-qrcode";
@@ -9,6 +9,15 @@ const VentasApp = () => {
   const [productos, setProductos] = useState([]);
   const [totalVenta, setTotalVenta] = useState(0.0);
   const [filaSeleccionada, setFilaSeleccionada] = useState(null);
+  const inputRef = useRef(null); // Referencia para el input
+
+
+  useEffect(() => {
+    // Enfoca el input cuando el componente se monta
+    inputRef.current.focus();
+  }, []); // El array vacío [] asegura que este efecto se ejecute solo una vez al montarse el componente
+
+
 
   // Función para manejar el escaneo de código de barras
   const iniciarEscaneo = () => {
@@ -96,6 +105,11 @@ const VentasApp = () => {
           0
         );
         setTotalVenta(nuevoTotal);
+// Enfocar el input de Código del Producto después de la eliminación
+        setTimeout(() => {
+          inputRef.current.focus();
+        }, 0);
+
         return nuevosProductos;
       });
       setFilaSeleccionada(null);
@@ -104,54 +118,6 @@ const VentasApp = () => {
 
   return (
     <div className="contenedor-principal">
-      <form onSubmit=  {handleSubmit}>
-        <label>
-          Código del Producto:
-          <input
-            type="text"
-            value={codigoProducto}
-            onChange={(e) => setCodigoProducto(e.target.value)}
-            required
-          />
-        </label>
-        <br />
-        <label>
-          Cantidad:
-          <input
-            type="text"
-            value={cantidad}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (/^-?\d*\.?\d*$/.test(value) || value === "") {
-                setCantidad(value);
-              }
-            }}
-            required
-          />
-        </label>
-        <br />
-       
-        <button type="submit">Agregar</button>
-       
-      </form>
-
-      {/* Botón para iniciar el escaneo de código de barras */}
-      <button className="boton-escanear" onClick={iniciarEscaneo}>Escanear Código de Barras</button>
-
-      {/* Contenedor para mostrar la cámara */}
-      <div id="reader"></div>
-
-      <div className="boton-container">
-        <button
-          className="boton-eliminar"
-          type="button"
-          onClick={handleEliminarProducto}
-          disabled={filaSeleccionada === null}
-        >
-          Eliminar
-        </button>
-      </div>
-
       <section className="tabla-containersection">
         <table className="productos-table">
           <thead>
@@ -187,12 +153,57 @@ const VentasApp = () => {
           </tbody>
         </table>
       </section>
+      <form onSubmit={handleSubmit}>
+  <label>
+    Código del Producto:
+    <input
+      ref={inputRef} // Asignar la referencia al input
+      type="text"
+      value={codigoProducto}
+      onChange={(e) => setCodigoProducto(e.target.value)}
+      required
+    />
+  </label>
+  <label>
+    Cantidad:
+    <input
+      type="text"
+      value={cantidad}
+      onChange={(e) => {
+        const value = e.target.value;
+        if (/^-?\d*\.?\d*$/.test(value) || value === "") {
+          setCantidad(value);
+        }
+      }}
+      required
+    />
+  </label>
 
-      <div>
-        <h3>TOTAL VENTA: ${totalVenta.toFixed(2)}</h3>
-      </div>
+  {/* Agrupar los botones en un contenedor */}
+  <div className="contenedor-botones">
+    <button type="submit">Agregar</button>
+    <button className="boton-escanear" type="button" onClick={iniciarEscaneo}>
+      Escanear Código de Barras
+    </button>
+    <button
+      className="boton-eliminar"
+      type="button"
+      onClick={handleEliminarProducto}
+      disabled={filaSeleccionada === null}
+    >
+      Eliminar
+    </button>
+  </div>
+  </form>
+
+
+    {/* Contenedor para mostrar la cámara */}
+    <div id="reader"></div>
+
+    <div className="total-venta">
+      <h1>TOTAL VENTA: ${totalVenta.toFixed(2)}</h1>
     </div>
-  );
+  </div>
+);
 };
-
 export default VentasApp;

@@ -11,7 +11,7 @@ const Ventas = () => {
 
   return (
     <div>
-      <h1>VENTAS Caja Express</h1>
+      <h2>VENTAS Caja Express</h2>
 
       {/* Mostrar el botón solo si mostrarVentasApp es false */}
       {!mostrarVentasApp && (

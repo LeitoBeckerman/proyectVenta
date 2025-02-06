@@ -1,72 +1,29 @@
 .ventas-app {
-    font-family: Arial, sans-serif;
-    padding: 10px;
-    border-radius: 8px;
-    max-width: 600px;
-    margin: auto;
-  }
-
-  .contenedor-principal {
-    display: flex;
-    flex-direction: column; /* Apila los elementos verticalmente */
-    align-items: center; /* Centra los elementos horizontalmente */
-    min-height: 100vh;
-    padding: 20px; /* Espaciado interno */
-    box-sizing: border-box; /* Incluye el padding en el ancho y alto */
-  }
-  
-  form {
-    margin-bottom: 20px;
-  }
-  
-
-/* Ocultar flechas en Chrome, Safari, Edge */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-
-
-label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: bold;
+.contenedor-principal {
+  display: flex;
+  flex-direction: column; /* Apila los elementos verticalmente */
+  justify-content: space-between; /* Empuja el form al fondo */
+  align-items: center;
+  height: 100vh; /* Ocupa toda la pantalla */
+  padding: 20px;
+  overflow: hidden; /* Evita el desplazamiento vertical */
 }
 
-input {
-  padding: 5px;
-  margin-left: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-button {
-
-  padding: 10px 15px;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-
-  border: 1px solid rgba(0, 0, 0, 0.3);
-  color: black;
-  text-align: center;
-  text-decoration: none;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
-}
-
-button:hover {
-  background-color: lightblue;
-}
+/* Asegúrate de que la tabla y su contenedor usen el espacio disponible */
 .tabla-containersection {
+  flex-grow: 1;
   width: 100%;
-  max-height: 300px; /* Ajusta la altura máxima según lo necesites */
-  overflow-y: auto; /* Agrega el scroll solo al cuerpo de la tabla */
+  overflow-y: auto;
+  margin-bottom: 20px;
 }
-
-
 
 .productos-table {
   width: 100%;
@@ -75,26 +32,27 @@ button:hover {
   table-layout: auto;
 }
 
-
+/* Ajusta la altura de la tabla para que ocupe el espacio disponible */
 .productos-table th,
 .productos-table td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
-
 }
 
-
+/* Asegúrate de que el encabezado se mantenga fijo */
 .productos-table thead {
-  background-color: black; /* Color azul para el encabezado */
+  background-color: black;
   color: white;
   position: sticky;
-  top: 0; /* Fija el encabezado en la parte superior */
-  z-index: 1; /* Asegura que el encabezado quede por encima del contenido */
+  top: 0;
+  z-index: 1;
 }
+
+/* Ajusta los demás estilos para que se vean bien en el nuevo diseño */
 .productos-table th.cantidad-col,
 .productos-table td.cantidad-col {
-  width: auto; /* Ajusta el valor según lo necesites */
+  width: auto; /* Ajusta este valor según lo necesites */
 }
 
 .input-cantidad {
@@ -112,69 +70,97 @@ button:hover {
   border: 2px solid;
 }
 
-
-
-
-
-
-/* Filas alternadas */
+/* Estilo para filas alternadas y hover */
 .productos-table tbody tr:nth-child(odd) {
-    background-color: #f2f2f2; /* Color gris claro para filas impares */
-  }
-  
-  .productos-table tbody tr:nth-child(even) {
-    background-color: #cfcfcf; /* Color azul claro para filas pares */
-  }
-  
-  /* Efecto hover en filas */
-  .productos-table tbody tr:hover {
-    background-color: orange; /* Color más oscuro al pasar el ratón */
-  }
+  background-color: #f2f2f2;
+}
 
-  .boton-container {
-    
-    justify-content: center; /* Centra el botón */
-    margin-top: 40px;
-  }
-  
-  .boton-eliminar {
-    padding: 10px 20px; /* Ajusta el padding para hacerlo más pequeño */
-    font-size: 16px; /* Tamaño de fuente */
-    background-color: #f44336; /* Color de fondo */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .boton-eliminar:disabled {
-    background-color: #dcdcdc; /* Color gris cuando está deshabilitado */
-    cursor: not-allowed;
-  }
-  
-  .boton-eliminar:hover {
-    background-color: #e53935; /* Efecto hover */
-  }
+.productos-table tbody tr:nth-child(even) {
+  background-color: #cfcfcf;
+}
 
+.productos-table tbody tr:hover {
+  background-color: orange;
+}
 
-/* Estilo para la fila seleccionada */
 .productos-table tbody tr.seleccionado {
-  background-color: #35a0ee; /* Asegúrate de que tenga alta prioridad */
-  color: black; /* Asegúrate de que el texto sea visible */
+  background-color: #35a0ee;
+  color: black;
   cursor: pointer;
   font-weight: 530;
 }
 
-.boton-escanear {
-  padding: 10px 15px; /* Ajusta el padding para hacerlo más pequeño */
-  color: black;
+/* Ajusta el estilo del formulario y botones para que se ubiquen al fondo */
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start; /* Alinea los elementos a la izquierda */
+  align-items: center; /* Centra los elementos verticalmente */
+  gap: 10px; /* Espacio entre los elementos */
+  margin-top: auto; /* Empuja el form hacia abajo */
+}
+
+
+
+form label {
+  display: inline-flex;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  font-weight: bold;
+  width: 150%; /* Asegura que cada label ocupe toda la línea */
+}
+
+
+
+form button, .boton-escanear, .boton-eliminar {
+  padding: 10px 15px;
+  font-size: 14px;
+  width: auto;
+  max-width: 150px;
+  text-align: center;
+  cursor: pointer;
+}
+
+button:hover, .boton-escanear:hover {
+  background-color: lightblue;
+}
+
+.contenedor-botones {
+  display: flex;
+  justify-content: center; /* Centra los elementos horizontalmente */
+  gap: 10px; /* Espacio entre los elementos */
+  margin-top: 15px; /* Empuja estos elementos hacia abajo */
+}
+
+
+.boton-eliminar {
+  background-color: #f44336;
+  color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
-  border-radius: 4px;
-  cursor: pointer;
+  width: auto;
+}
 
+.boton-eliminar:disabled {
+  background-color: #dcdcdc;
+  cursor: not-allowed;
+}
 
+.boton-eliminar:hover {
+  background-color: #e53935;
+}
+
+/* Ocultar flechas en Chrome, Safari, Edge */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.total-venta{
+  display: flex;
+  margin-right: -280px; /* Empuja estos elementos hacia abajo */
 }
