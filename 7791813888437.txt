@@ -1,7 +1,21 @@
 7791813888437
 7791813888437
 C:\Users\leobe\OneDrive\Escritorio\LeandroBeckerman\PuntoDeVentaProjec\PuntoDeVenta\react-ventas>npm run start-https
+Para reconstruir con CSS la pagina web https///npm run build
 
+
+{
+    "productos": [
+        {
+            "nombre_producto": "Pepsi Retornable x2L",
+            "codigo_producto": "7791813888437",
+            "precio": "2200.00"
+        }
+    ]
+}
+
+User Leandro
+pASS Becker123
 
 git add nombre_de_la_carpeta_o_archivo
 git commit -m "Añadir nuevas carpetas y archivos"
@@ -73,3 +87,95 @@ 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
     };
   </script>
 {% endblock %}
+
+
+
+
+
+
+
+
+///////////////////////python views.
+def ventas_view(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            codigo_producto = data.get('codigo_producto')
+             # Validar que el código de producto no esté vacío
+            if not codigo_producto:
+                return JsonResponse({'error': 'El código de producto es requerido', 'codigo_producto': None}, status=400)
+
+            #buscar el producto
+            producto = Producto.objects.get(codigo=codigo_producto)
+            #buscar el precio del producto
+            precio_producto = PrecioProducto.objects.get(producto=producto)
+#precioProducto tiene la tabla precioProducto, pero el nombre de precio es monto
+
+            return JsonResponse({
+                'nombre_producto': producto.nombre,
+                'precio': precio_producto.monto,
+            })
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Datos JSON no válidos'}, status=400)
+        except Producto.DoesNotExist:
+            return JsonResponse({'error': 'Producto no encontrado', 'codigo_producto': None})
+        except PrecioProducto.DoesNotExist:
+            return JsonResponse({'error': 'Precio no disponible', 'codigo_producto': codigo_producto})
+    else:
+        return render(request, 'ventas.html')  # Renderiza ventas.html cuando es GET
+
+
+
+
+
+
+
+
+////////////////////////////////productoService.jsonexport const agregarProducto = async (codigoProducto, cantidad, setProductos, setTotalVenta, setCodigoProducto, setCantidad) => {
+    try {
+      const response = await fetch("http://localhost:8000", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          codigo_producto: codigoProducto,
+        }),
+      });
+  
+      const data = await response.json();
+
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+      else{
+        const nuevoProducto = {
+          ...data,
+          codigo_producto: codigoProducto,
+          cantidad, // Mantener como string
+          precio: parseFloat(data.precio),
+          subtotal: parseFloat(data.precio) * (parseFloat(cantidad) || 0),
+        };
+    
+        setProductos((prevProductos) => {
+          const nuevosProductos = [...prevProductos, nuevoProducto];
+          const nuevoTotal = nuevosProductos.reduce(
+            (acc, producto) => acc + producto.subtotal,
+            0
+          );
+          setTotalVenta(nuevoTotal);
+          return nuevosProductos;
+        });
+    
+        // Limpiar los campos de entrada
+        setCodigoProducto("");
+        setCantidad("1"); // Mantener como string
+        
+      }
+
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
+    }
+  };
+  

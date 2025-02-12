@@ -2,6 +2,7 @@ import React, { useState, useEffect,useRef} from "react";
 import "./VentasApp.css";
 import { agregarProducto } from "../utils/productosService.js";
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from "html5-qrcode";
+import Autosuggest from 'react-autosuggest';
 
 const VentasApp = () => {
   const [codigoProducto, setCodigoProducto] = useState("");
@@ -9,6 +10,10 @@ const VentasApp = () => {
   const [productos, setProductos] = useState([]);
   const [totalVenta, setTotalVenta] = useState(0.0);
   const [filaSeleccionada, setFilaSeleccionada] = useState(null);
+
+  const [suggestions, setSuggestions] = useState([]);
+  const [productName, setProductName] = useState(''); // Nuevo estado para el nombre del producto
+
   const inputRef = useRef(null); // Referencia para el input
 
 
@@ -16,6 +21,58 @@ const VentasApp = () => {
     // Enfoca el input cuando el componente se monta
     inputRef.current.focus();
   }, []); // El array vacío [] asegura que este efecto se ejecute solo una vez al montarse el componente
+
+
+ // Funciones para el autocompletado
+ const getSuggestionValue = suggestion => suggestion.nombre_producto;
+ const renderSuggestion = suggestion => (
+   <div>
+     {suggestion.nombre_producto} - ${suggestion.precio}
+   </div>
+ );
+
+ const onSuggestionsFetchRequested = async ({ value }) => {
+   if (value.length > 1) { // Solo buscar si hay al menos 2 caracteres
+     try {
+       const response = await fetch("http://localhost:8000", {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({ nombre_producto: value }),
+       });
+       const data = await response.json();
+       console.log("Datos recibidos:", data);
+       if (data.productos) {
+         setSuggestions(data.productos); //Asigna los productos a las sugerencias.
+       } else {
+         setSuggestions([]);
+       }
+     } catch (error) {
+       console.error('Error al buscar productos:', error);
+       setSuggestions([]); // En caso de error, limpiar sugerencias
+     }
+   } else {
+     setSuggestions([]); // Si el valor es demasiado corto, limpiar sugerencias
+   }
+ };
+
+ const onSuggestionsClearRequested = () => {
+   setSuggestions([]);
+ };
+
+ const onChange = (event, { newValue }) => {
+   setProductName(newValue);
+     // Filtrar sugerencias sin importar mayúsculas/minúsculas
+  const filteredSuggestions = suggestions.filter(suggestion =>
+    suggestion.nombre_producto.toLowerCase().includes(newValue.toLowerCase())
+  );
+  setSuggestions(filteredSuggestions);
+};
+
+
+
+
 
 
 
@@ -73,19 +130,43 @@ const VentasApp = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const resultado = await agregarProducto(
-        codigoProducto, 
-        cantidad, 
-        setProductos, 
-        setTotalVenta, 
-        setCodigoProducto, 
-        setCantidad
-      );
-      if (!resultado) {
-        console.log("El producto no se agrega porque es inválido.");
-        return;
-      }
+      if (productName) { // Si estamos usando el autocompletado
+        const selectedProduct = suggestions.find(s => s.nombre_producto.toLowerCase() === productName.toLowerCase());
+        if (selectedProduct) {
+          const resultado = await agregarProducto(
+            selectedProduct.codigo_producto,
+            cantidad,
+            selectedProduct.nombre_producto,
+            setProductos,
+            setTotalVenta,
+            () => {setCodigoProducto(""); setProductName("");},
+            setCantidad
+          );
+          if (!resultado) {
+            console.log("El producto no se agrega porque es inválido.");
+            return;
+          }
+        } else {
+          alert("Producto no encontrado en la lista de sugerencias.");
+          return;
+        }
+      } else { // Si estamos usando el código de producto
+        const resultado = await agregarProducto(
+          codigoProducto,
+          cantidad,
+          "",
+          setProductos,
+          setTotalVenta,
+          setCodigoProducto,
+          setCantidad
+        );
 
+     
+        if (!resultado) {
+          console.log("El producto no se agrega porque es inválido.");
+          return;
+        }
+      }
     } catch (error) {
       console.error("Error al agregar producto:", error);
       alert("Hubo un error al agregar el producto.");
@@ -154,30 +235,45 @@ const VentasApp = () => {
         </table>
       </section>
       <form onSubmit={handleSubmit}>
-  <label>
-    Código del Producto:
-    <input
-      ref={inputRef} // Asignar la referencia al input
-      type="text"
-      value={codigoProducto}
-      onChange={(e) => setCodigoProducto(e.target.value)}
-      required
-    />
-  </label>
-  <label>
-    Cantidad:
-    <input
-      type="text"
-      value={cantidad}
-      onChange={(e) => {
-        const value = e.target.value;
-        if (/^-?\d*\.?\d*$/.test(value) || value === "") {
-          setCantidad(value);
-        }
-      }}
-      required
-    />
-  </label>
+      <label>
+          Nombre del Producto:
+          <Autosuggest
+            suggestions={suggestions}
+            onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+            onSuggestionsClearRequested={onSuggestionsClearRequested}
+            getSuggestionValue={getSuggestionValue}
+            renderSuggestion={renderSuggestion}
+            inputProps={{
+              placeholder: 'Escribe el nombre del producto...',
+              value: productName,
+              onChange: onChange,
+            }}
+          />
+      </label>
+      <label>
+        Código del Producto:
+        <input
+          ref={inputRef} // Asignar la referencia al input
+          type="text"
+          value={codigoProducto}
+          onChange={(e) => setCodigoProducto(e.target.value)}
+          //required
+        />
+      </label>
+      <label>
+        Cantidad:
+        <input
+          type="text"
+          value={cantidad}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (/^-?\d*\.?\d*$/.test(value) || value === "") {
+              setCantidad(value);
+            }
+          }}
+          required
+        />
+      </label>
 
   {/* Agrupar los botones en un contenedor */}
   <div className="contenedor-botones">
