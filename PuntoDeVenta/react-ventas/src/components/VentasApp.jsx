@@ -23,13 +23,64 @@ const VentasApp = () => {
   }, []); // El array vacío [] asegura que este efecto se ejecute solo una vez al montarse el componente
 
 
+
+
+
+
+
+
+
+
+
+
+  
  // Funciones para el autocompletado
- const getSuggestionValue = suggestion => suggestion.nombre_producto;
- const renderSuggestion = suggestion => (
-   <div>
-     {suggestion.nombre_producto} - ${suggestion.precio}
-   </div>
- );
+  // Obtener el valor de la sugerencia
+  const getSuggestionValue = (suggestion) => suggestion.nombre_producto;
+
+  // Renderizar cada sugerencia con un click para agregarla, muestra la lista
+  const renderSuggestion = (suggestion) => (
+    <div
+      onClick={() => {
+        handleSuggestionSelected(suggestion);
+        setCodigoProducto("");  // Limpiar el código del producto
+        // Enfocar el input de Código del Producto después de clic
+        setTimeout(() => {
+          inputRef.current.focus();
+          setProductName("");  // Limpiar el input de nombre del producto
+        }, 0);
+        
+         // Volver a enfocar en el código del producto
+
+      }}
+      style={{ cursor: "pointer", padding: "5px", borderBottom: "1px solid #ddd" }}
+    >
+      {suggestion.nombre_producto} - ${suggestion.precio}
+    </div>
+  );
+
+// Manejar la selección de una sugerencia y agregarla a la tabla
+  const handleSuggestionSelected = (suggestion) => {
+    const nuevaCantidad = isNaN(parseFloat(cantidad)) ? 1 : parseFloat(cantidad);
+    const nuevoProducto = {
+      codigo_producto: suggestion.codigo_producto,
+      cantidad: nuevaCantidad,
+      nombre_producto: suggestion.nombre_producto,
+      precio: parseFloat(suggestion.precio),
+      subtotal: nuevaCantidad * parseFloat(suggestion.precio),
+    };
+
+    setProductos((prevProductos) => [...prevProductos, nuevoProducto]);
+    setTotalVenta((prevTotal) => prevTotal + nuevoProducto.subtotal);
+
+    // Limpiar los campos
+    setCodigoProducto("");
+    setProductName("");
+    setCantidad("1");
+  };
+
+
+
 
  const onSuggestionsFetchRequested = async ({ value }) => {
    if (value.length > 1) { // Solo buscar si hay al menos 2 caracteres
