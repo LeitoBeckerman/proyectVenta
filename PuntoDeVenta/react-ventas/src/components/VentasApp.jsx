@@ -55,7 +55,7 @@ const VentasApp = () => {
       }}
       style={{ cursor: "pointer", padding: "5px", borderBottom: "1px solid #ddd" }}
     >
-      {suggestion.nombre_producto} - ${suggestion.precio}
+      {suggestion.nombre_producto} -{suggestion.marca} - ${suggestion.precio}
     </div>
   );
 
@@ -65,7 +65,7 @@ const VentasApp = () => {
     const nuevoProducto = {
       codigo_producto: suggestion.codigo_producto,
       cantidad: nuevaCantidad,
-      nombre_producto: suggestion.nombre_producto,
+      nombre_producto: suggestion.nombre_producto+' '+suggestion.marca,
       precio: parseFloat(suggestion.precio),
       subtotal: nuevaCantidad * parseFloat(suggestion.precio),
     };

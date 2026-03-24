@@ -5,16 +5,35 @@ from django.utils.timezone import now
 
 # Modelo de Producto
 class Producto(models.Model):
-    codigo = models.CharField(max_length=20, unique=True)  # Código único para cada producto
+
+    UNIDADES_CHOICES = [
+        ('UN', 'Unidad'),
+        ('KG', 'Kilogramo'),
+    ]
+    codigo = models.CharField(
+        max_length=100, 
+        unique=True, 
+        null=True,   # Permite que en la base de datos sea NULL
+        blank=True   # Permite que en formularios de Django se deje vacío
+    )
     nombre = models.CharField(max_length=100)
-    #stock = models.IntegerField() #no va es actualizable cte.
+    marca = models.CharField(max_length=100, blank=True, null=True)
+    # Tu nuevo campo con el nombre que pediste
+    unidad_venta = models.CharField(
+    max_length=2, 
+    choices=UNIDADES_CHOICES, 
+    default='UN'
+    )
 
     def __str__(self):
-        return f"{self.codigo} - {self.nombre}"
-
+        # Manejamos el caso de que el código sea None
+        cod = self.codigo if self.codigo else "SIN CÓDIGO"
+        return f"{cod} - {self.nombre}"
+    
+    
     # Método para obtener el precio actual
     def precio_actual(self):
-        precio = self.precios.order_by('-fecha_inicio').first()  # Último precio válido
+        precio = self.precios.order_by('-fecha_inicio').first()
         return precio.monto if precio else None
 
 # Modelo para el historial de precios

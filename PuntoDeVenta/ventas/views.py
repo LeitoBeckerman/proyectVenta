@@ -49,7 +49,8 @@ def _buscar_por_nombre(nombre_producto):
             results.append({
                 'nombre_producto': producto.nombre,
                 'codigo_producto': producto.codigo,
-                'precio': precio
+                'precio': precio,
+                'marca': producto.marca
             })
         except PrecioProducto.DoesNotExist:
             continue  

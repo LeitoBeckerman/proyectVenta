@@ -4,6 +4,24 @@ C:\Users\leobe\OneDrive\Escritorio\LeandroBeckerman\PuntoDeVentaProjec\PuntoDeVe
 Para reconstruir con CSS la pagina web https///npm run build
 
 
+
+
+
+
+python -m venv venv
+.\venv\Scripts\activate
+
+
+pip install django
+# Si el proyecto usa otros paquetes (como djangorestframework), instálalos también.
+
+
+python manage.py makemigrations
+python manage.py migrate
+
+python manage.py runserver
+
+
 {
     "productos": [
         {
@@ -13,6 +31,17 @@ Para reconstruir con CSS la pagina web https///npm run build
         }
     ]
 }
+
+npm install
+
+Ejecutar React:
+Dependiendo de cómo esté configurado tu proyecto, el comando suele ser uno de estos dos (prueba el primero, si no funciona, el segundo):
+PowerShell
+
+npm start
+# O si usas herramientas más modernas como Vite:
+npm run dev
+
 
 User Leandro
 pASS Becker123
