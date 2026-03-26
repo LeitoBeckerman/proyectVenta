@@ -16,6 +16,10 @@ const VentasApp = () => {
 
   const inputRef = useRef(null); // Referencia para el input
 
+  // Nuevo estado para mostrar el resumen y ref para impresión
+  const [mostrarResumen, setMostrarResumen] = useState(false);
+  const resumenRef = useRef(null);
+
 
   useEffect(() => {
     // Enfoca el input cuando el componente se monta
@@ -247,6 +251,25 @@ const VentasApp = () => {
       setFilaSeleccionada(null);
     }
   }
+  
+  // Mostrar el resumen en la misma pantalla
+  const finalizarVenta = () => {
+    setMostrarResumen(true);
+    setTimeout(() => {
+      if (resumenRef.current) resumenRef.current.scrollIntoView({ behavior: 'smooth' });
+    }, 0);
+  };
+  
+  // Imprimir solo el resumen (usa una clase temporal en el body para las reglas @media print)
+  const imprimirTicket = () => {
+    document.body.classList.add('only-print-resumen');
+    // Dejar tiempo para que la clase se aplique
+    setTimeout(() => {
+      window.print();
+      // Quitar la clase después de imprimir
+      setTimeout(() => document.body.classList.remove('only-print-resumen'), 500);
+    }, 100);
+  };
 
   return (
     <div className="contenedor-principal">
@@ -328,29 +351,64 @@ const VentasApp = () => {
 
   {/* Agrupar los botones en un contenedor */}
   <div className="contenedor-botones">
-    <button type="submit">Agregar</button>
-    <button className="boton-escanear" type="button" onClick={iniciarEscaneo}>
-      Escanear Código de Barras
-    </button>
-    <button
-      className="boton-eliminar"
-      type="button"
-      onClick={handleEliminarProducto}
-      disabled={filaSeleccionada === null}
-    >
-      Eliminar
-    </button>
-  </div>
-  </form>
+     <button type="submit">Agregar</button>
+     <button className="boton-escanear" type="button" onClick={iniciarEscaneo}>
+       Escanear Código de Barras
+     </button>
+    <button type="button" onClick={finalizarVenta}>Finalizar Venta</button>
+     <button
+       className="boton-eliminar"
+       type="button"
+       onClick={handleEliminarProducto}
+       disabled={filaSeleccionada === null}
+     >
+       Eliminar
+     </button>
+   </div>
+   </form>
 
 
-    {/* Contenedor para mostrar la cámara */}
-    <div id="reader"></div>
+     {/* Contenedor para mostrar la cámara */}
+     <div id="reader"></div>
 
-    <div className="total-venta">
-      <h1>TOTAL VENTA: ${totalVenta.toFixed(2)}</h1>
-    </div>
-  </div>
-);
-};
-export default VentasApp;
+     {/* Resumen imprimible (aparece en la misma pantalla) */}
+     {mostrarResumen && (
+      <div className="resumen-venta" ref={resumenRef}>
+        <h2>Resumen de la Venta</h2>
+        <table className="productos-table">
+          <thead>
+            <tr>
+              <th>CANTIDAD</th>
+              <th>PRODUCTO</th>
+              <th>PRECIO</th>
+              <th>IMPORTE</th>
+            </tr>
+          </thead>
+          <tbody>
+            {productos.map((producto, index) => (
+              <tr key={index}>
+                <td className="cantidad-col">{producto.cantidad}</td>
+                <td>{producto.nombre_producto}</td>
+                <td>${producto.precio.toFixed(2)}</td>
+                <td>${producto.subtotal.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="resumen-acciones">
+          <h3>TOTAL: ${totalVenta.toFixed(2)}</h3>
+          <div className="botones-resumen">
+            <button type="button" onClick={imprimirTicket}>Imprimir Ticket</button>
+            <button type="button" onClick={() => setMostrarResumen(false)}>Cerrar</button>
+          </div>
+        </div>
+      </div>
+    )}
+
+     <div className="total-venta">
+       <h1>TOTAL VENTA: ${totalVenta.toFixed(2)}</h1>
+     </div>
+   </div>
+ );
+ };
+ export default VentasApp;
