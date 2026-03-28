@@ -106,6 +106,26 @@ export const actualizarProducto = async (productoActualizado) => {
   }
 };
 
+// Función para verificar si un producto ya existe por código
+export const verificarProductoDuplicado = async (codigoProducto) => {
+  try {
+    const response = await fetch("http://localhost:8000", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ codigo_producto: codigoProducto }),
+    });
+
+    const data = await response.json();
+    // Si encontró un producto con ese código, devuelve true (existe)
+    return data.productos && data.productos.length > 0;
+  } catch (error) {
+    console.error("Error al verificar producto duplicado:", error);
+    return false;
+  }
+};
+
 // Función para crear un nuevo producto en la BD
 export const crearProductoBD = async (datosProducto) => {
   try {

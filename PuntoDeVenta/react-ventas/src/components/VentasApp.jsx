@@ -1,6 +1,6 @@
 import React, { useState, useEffect,useRef} from "react";
 import "./VentasApp.css";
-import { agregarProducto, buscarProductosParaEdicion, actualizarProducto, crearProductoBD } from "../utils/productosService.js";
+import { agregarProducto, buscarProductosParaEdicion, actualizarProducto, crearProductoBD, verificarProductoDuplicado } from "../utils/productosService.js";
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import Autosuggest from 'react-autosuggest';
 
@@ -443,6 +443,14 @@ const VentasApp = () => {
 
   const handleGuardarProducto = async () => {
     if (!validarDatosProducto()) {
+      return;
+    }
+
+    // Verificar si el producto ya existe
+    const productoDuplicado = await verificarProductoDuplicado(datosNuevoProducto.codigo_producto);
+    
+    if (productoDuplicado) {
+      setErrorCreacion("⚠️ Producto duplicado, debe actualizar no agregar producto");
       return;
     }
 
