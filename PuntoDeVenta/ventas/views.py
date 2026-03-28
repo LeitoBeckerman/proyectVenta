@@ -30,32 +30,33 @@ def ventas_view(request):
 def _buscar_por_codigo(codigo_producto):
     try:
         producto = Producto.objects.get(codigo=codigo_producto)
-        precio_producto = PrecioProducto.objects.get(producto=producto)
+        precio_producto = PrecioProducto.objects.filter(producto=producto).order_by('-fecha_inicio').first()
+        if not precio_producto:
+            return JsonResponse({'error': 'Precio no disponible', 'codigo_producto': codigo_producto})
+
         return JsonResponse({
             'nombre_producto': producto.nombre,
             'precio': precio_producto.monto,
         })
     except Producto.DoesNotExist:
         return JsonResponse({'error': 'Producto no encontrado', 'codigo_producto': None})
-    except PrecioProducto.DoesNotExist:
-        return JsonResponse({'error': 'Precio no disponible', 'codigo_producto': codigo_producto})
 
 def _buscar_por_nombre(nombre_producto):
     productos = Producto.objects.filter(nombre__icontains=nombre_producto)
     results = []
     for producto in productos:
-        try:
-            precio = PrecioProducto.objects.get(producto=producto).monto
-            results.append({
-                'id': producto.id,
-                'nombre_producto': producto.nombre,
-                'codigo_producto': producto.codigo,
-                'precio': precio,
-                'marca': producto.marca,
-                'unidad_venta': producto.unidad_venta
-            })
-        except PrecioProducto.DoesNotExist:
-            continue  
+        precio_obj = PrecioProducto.objects.filter(producto=producto).order_by('-fecha_inicio').first()
+        if not precio_obj:
+            continue
+
+        results.append({
+            'id': producto.id,
+            'nombre_producto': producto.nombre,
+            'codigo_producto': producto.codigo,
+            'precio': precio_obj.monto,
+            'marca': producto.marca,
+            'unidad_venta': producto.unidad_venta
+        })
     return JsonResponse({'productos': results})
 
 
