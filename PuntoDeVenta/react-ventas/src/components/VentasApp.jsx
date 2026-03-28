@@ -1,6 +1,6 @@
 import React, { useState, useEffect,useRef} from "react";
 import "./VentasApp.css";
-import { agregarProducto, buscarProductosParaEdicion, actualizarProducto } from "../utils/productosService.js";
+import { agregarProducto, buscarProductosParaEdicion, actualizarProducto, crearProductoBD } from "../utils/productosService.js";
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import Autosuggest from 'react-autosuggest';
 
@@ -36,6 +36,17 @@ const VentasApp = () => {
 
   const [mensajeConfirmacion, setMensajeConfirmacion] = useState("");
   const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
+
+  // Estados para el modal de creación de productos
+  const [mostrarModalCreacion, setMostrarModalCreacion] = useState(false);
+  const [datosNuevoProducto, setDatosNuevoProducto] = useState({
+    codigo_producto: "",
+    nombre_producto: "",
+    marca: "",
+    unidad_venta: "UN",
+    precio: "",
+  });
+  const [errorCreacion, setErrorCreacion] = useState("");
 
 
   useEffect(() => {
@@ -374,6 +385,81 @@ const VentasApp = () => {
     cerrarModalEdicion();
   };
 
+  // Funciones para el modal de creación de productos
+  const abrirModalCreacion = () => {
+    setMostrarModalCreacion(true);
+    setDatosNuevoProducto({
+      codigo_producto: "",
+      nombre_producto: "",
+      marca: "",
+      unidad_venta: "UN",
+      precio: "",
+    });
+    setErrorCreacion("");
+  };
+
+  const cerrarModalCreacion = () => {
+    setMostrarModalCreacion(false);
+    setDatosNuevoProducto({
+      codigo_producto: "",
+      nombre_producto: "",
+      marca: "",
+      unidad_venta: "UN",
+      precio: "",
+    });
+    setErrorCreacion("");
+  };
+
+  const handleCambiarDatosCreacion = (field, value) => {
+    setDatosNuevoProducto(prevData => ({
+      ...prevData,
+      [field]: value,
+    }));
+    // Limpiar errores cuando el usuario empieza a escribir
+    if (errorCreacion) {
+      setErrorCreacion("");
+    }
+  };
+
+  const validarDatosProducto = () => {
+    if (!datosNuevoProducto.codigo_producto.trim()) {
+      setErrorCreacion("El código del producto es obligatorio");
+      return false;
+    }
+    if (!datosNuevoProducto.nombre_producto.trim()) {
+      setErrorCreacion("El nombre del producto es obligatorio");
+      return false;
+    }
+    if (!datosNuevoProducto.marca.trim()) {
+      setErrorCreacion("La marca es obligatoria");
+      return false;
+    }
+    if (!datosNuevoProducto.precio || parseFloat(datosNuevoProducto.precio) <= 0) {
+      setErrorCreacion("El precio debe ser mayor a 0");
+      return false;
+    }
+    return true;
+  };
+
+  const handleGuardarProducto = async () => {
+    if (!validarDatosProducto()) {
+      return;
+    }
+
+    const resultado = await crearProductoBD(datosNuevoProducto);
+
+    if (resultado.success) {
+      setMensajeConfirmacion("✓ Producto creado correctamente");
+      setMostrarConfirmacion(true);
+      setTimeout(() => {
+        setMostrarConfirmacion(false);
+        cerrarModalCreacion();
+      }, 2000);
+    } else {
+      setErrorCreacion(resultado.error || "Error al crear el producto");
+    }
+  };
+
   return (
     <div className="contenedor-principal">
       <section className="tabla-containersection">
@@ -457,6 +543,9 @@ const VentasApp = () => {
      <button type="submit">Agregar</button>
      <button className="boton-escanear" type="button" onClick={iniciarEscaneo}>
        Escanear Código de Barras
+     </button>
+     <button className="boton-crear-producto" type="button" onClick={abrirModalCreacion}>
+       Crear Producto
      </button>
      <button className="boton-actualizar" type="button" onClick={abrirModalEdicion}>
        Actualizar Producto
@@ -593,6 +682,93 @@ const VentasApp = () => {
      {mostrarConfirmacion && (
        <div className="confirmacion-banner">
          {mensajeConfirmacion}
+       </div>
+     )}
+
+     {/* Modal para crear nuevo producto */}
+     {mostrarModalCreacion && (
+       <div className="modal-overlay">
+         <div className="modal-creacion">
+           <div className="modal-header">
+             <h2>Crear Nuevo Producto</h2>
+             <button className="btn-cerrar-modal" onClick={cerrarModalCreacion}>×</button>
+           </div>
+
+           <div className="modal-creacion-campos">
+             {errorCreacion && (
+               <div className="error-banner">
+                 ⚠️ {errorCreacion}
+               </div>
+             )}
+
+             <div className="campo-creacion">
+               <label>Código del Producto:</label>
+               <input
+                 type="text"
+                 placeholder="Ej: ABC123456"
+                 value={datosNuevoProducto.codigo_producto}
+                 onChange={(e) => handleCambiarDatosCreacion("codigo_producto", e.target.value)}
+                 className="input-creacion"
+               />
+             </div>
+
+             <div className="campo-creacion">
+               <label>Nombre del Producto:</label>
+               <input
+                 type="text"
+                 placeholder="Ej: Leche Descremada"
+                 value={datosNuevoProducto.nombre_producto}
+                 onChange={(e) => handleCambiarDatosCreacion("nombre_producto", e.target.value)}
+                 className="input-creacion"
+               />
+             </div>
+
+             <div className="campo-creacion">
+               <label>Marca:</label>
+               <input
+                 type="text"
+                 placeholder="Ej: La Serenísima"
+                 value={datosNuevoProducto.marca}
+                 onChange={(e) => handleCambiarDatosCreacion("marca", e.target.value)}
+                 className="input-creacion"
+               />
+             </div>
+
+             <div className="campo-creacion">
+               <label>Unidad de Venta:</label>
+               <select
+                 value={datosNuevoProducto.unidad_venta}
+                 onChange={(e) => handleCambiarDatosCreacion("unidad_venta", e.target.value)}
+                 className="select-creacion"
+               >
+                 <option value="UN">Unidad (UN)</option>
+                 <option value="KG">Kilogramo (KG)</option>
+               </select>
+             </div>
+
+             <div className="campo-creacion">
+               <label>Precio:</label>
+               <input
+                 type="number"
+                 placeholder="Ej: 99.99"
+                 value={datosNuevoProducto.precio}
+                 onChange={(e) => handleCambiarDatosCreacion("precio", e.target.value)}
+                 className="input-creacion"
+                 step="0.01"
+                 min="0"
+               />
+             </div>
+
+             <div className="botones-creacion">
+               <button className="btn-aceptar" onClick={handleGuardarProducto}>
+                 Aceptar
+               </button>
+               <button className="btn-cancelar-creacion" onClick={cerrarModalCreacion}>
+                 Cancelar
+               </button>
+             </div>
+           </div>
+         </div>
        </div>
      )}
      {mostrarResumen && (

@@ -105,3 +105,26 @@ export const actualizarProducto = async (productoActualizado) => {
     return { success: false, error: "Error en la solicitud" };
   }
 };
+
+// Función para crear un nuevo producto en la BD
+export const crearProductoBD = async (datosProducto) => {
+  try {
+    const response = await fetch("http://localhost:8000/crear-producto", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(datosProducto),
+    });
+
+    const data = await response.json();
+    if (data && !data.error) {
+      return { success: true, mensaje: "Producto creado correctamente", producto: data.producto };
+    } else {
+      return { success: false, error: data ? data.error : "Error al crear el producto" };
+    }
+  } catch (error) {
+    console.error("Error al crear producto:", error);
+    return { success: false, error: "Error en la solicitud" };
+  }
+};

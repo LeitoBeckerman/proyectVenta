@@ -120,3 +120,72 @@ def editar_producto_view(request):
             return JsonResponse({'error': f'Error interno del servidor: {str(e)}'}, status=500)
     
     return JsonResponse({'error': 'Método no permitido. Use PUT'}, status=405)
+
+
+# Endpoint para crear un nuevo producto
+@csrf_exempt  # Desactiva la protección CSRF para permitir POST desde React
+def crear_producto_view(request):
+    """
+    Maneja solicitudes POST para crear un nuevo producto.
+    Crea el producto y su precio inicial.
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+
+            # Validar campos obligatorios
+            codigo = data.get('codigo_producto', '').strip()
+            nombre = data.get('nombre_producto', '').strip()
+            marca = data.get('marca', '').strip()
+            unidad_venta = data.get('unidad_venta', 'UN')
+            precio = data.get('precio', '')
+
+            if not codigo:
+                return JsonResponse({'error': 'El código del producto es obligatorio'}, status=400)
+            if not nombre:
+                return JsonResponse({'error': 'El nombre del producto es obligatorio'}, status=400)
+            if not marca:
+                return JsonResponse({'error': 'La marca es obligatoria'}, status=400)
+            if not precio:
+                return JsonResponse({'error': 'El precio es obligatorio'}, status=400)
+
+            # Verificar que el código no exista ya
+            if Producto.objects.filter(codigo=codigo).exists():
+                return JsonResponse({'error': f'El código {codigo} ya existe en la base de datos'}, status=400)
+
+            # Crear el nuevo producto
+            nuevo_producto = Producto.objects.create(
+                codigo=codigo,
+                nombre=nombre,
+                marca=marca,
+                unidad_venta=unidad_venta
+            )
+
+            # Crear el registro de precio
+            PrecioProducto.objects.create(
+                producto=nuevo_producto,
+                monto=float(precio)
+            )
+
+            return JsonResponse({
+                'error': None,
+                'mensaje': 'Producto creado correctamente',
+                'producto': {
+                    'id': nuevo_producto.id,
+                    'codigo_producto': nuevo_producto.codigo,
+                    'nombre_producto': nuevo_producto.nombre,
+                    'marca': nuevo_producto.marca,
+                    'unidad_venta': nuevo_producto.unidad_venta,
+                    'precio': float(precio),
+                }
+            })
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Datos JSON no válidos'}, status=400)
+        except ValueError:
+            return JsonResponse({'error': 'El precio debe ser un número válido'}, status=400)
+        except Exception as e:
+            print(f"Error al crear producto: {str(e)}")
+            return JsonResponse({'error': f'Error interno del servidor: {str(e)}'}, status=500)
+    
+    return JsonResponse({'error': 'Método no permitido. Use POST'}, status=405)
