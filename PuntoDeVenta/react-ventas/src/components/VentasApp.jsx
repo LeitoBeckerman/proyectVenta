@@ -87,17 +87,21 @@ const VentasApp = () => {
       }}
       style={{ cursor: "pointer", padding: "5px", borderBottom: "1px solid #ddd" }}
     >
-      {suggestion.nombre_producto} -{suggestion.marca} - ${suggestion.precio}
+      {suggestion.alias_ticket ? suggestion.alias_ticket : suggestion.nombre_producto} - {suggestion.marca} - ${suggestion.precio}
     </div>
   );
 
 // Manejar la selección de una sugerencia y agregarla a la tabla
   const handleSuggestionSelected = (suggestion) => {
     const nuevaCantidad = isNaN(parseFloat(cantidad)) ? 1 : parseFloat(cantidad);
+    const alias = suggestion.alias_ticket && suggestion.alias_ticket.trim() !== ''
+      ? suggestion.alias_ticket
+      : suggestion.nombre_producto;
     const nuevoProducto = {
       codigo_producto: suggestion.codigo_producto,
       cantidad: nuevaCantidad,
       nombre_producto: suggestion.nombre_producto+' '+suggestion.marca,
+      alias_ticket: alias,
       precio: parseFloat(suggestion.precio),
       subtotal: nuevaCantidad * parseFloat(suggestion.precio),
     };
@@ -147,8 +151,10 @@ const VentasApp = () => {
  const onChange = (event, { newValue }) => {
    setProductName(newValue);
      // Filtrar sugerencias sin importar mayúsculas/minúsculas
+  const lowerValue = newValue.toLowerCase();
   const filteredSuggestions = suggestions.filter(suggestion =>
-    suggestion.nombre_producto.toLowerCase().includes(newValue.toLowerCase())
+    (suggestion.nombre_producto && suggestion.nombre_producto.toLowerCase().includes(lowerValue)) ||
+    (suggestion.alias_ticket && suggestion.alias_ticket.toLowerCase().includes(lowerValue))
   );
   setSuggestions(filteredSuggestions);
 };
@@ -214,7 +220,11 @@ const VentasApp = () => {
     event.preventDefault();
     try {
       if (productName) { // Si estamos usando el autocompletado
-        const selectedProduct = suggestions.find(s => s.nombre_producto.toLowerCase() === productName.toLowerCase());
+        const lowerValue = productName.toLowerCase();
+        const selectedProduct = suggestions.find(s =>
+          s.nombre_producto.toLowerCase() === lowerValue ||
+          (s.alias_ticket && s.alias_ticket.toLowerCase() === lowerValue)
+        );
         if (selectedProduct) {
           const resultado = await agregarProducto(
             selectedProduct.codigo_producto,
@@ -340,6 +350,7 @@ const VentasApp = () => {
       id: producto.id || "",
       codigo_producto: producto.codigo_producto || "",
       nombre_producto: producto.nombre_producto || "",
+      alias_ticket: producto.alias_ticket || "",
       marca: producto.marca || "",
       unidad_venta: producto.unidad_venta || "",
       precio: producto.precio || "",
@@ -642,6 +653,15 @@ const VentasApp = () => {
                </div>
 
                <div className="campo-edicion">
+                 <label>Alias Ticket:</label>
+                 <input
+                   type="text"
+                   value={dataProductoEdicion.alias_ticket}
+                   onChange={(e) => handleCambiarDatosEdicion("alias_ticket", e.target.value)}
+                 />
+               </div>
+
+               <div className="campo-edicion">
                  <label>Marca:</label>
                  <input
                    type="text"
@@ -732,6 +752,17 @@ const VentasApp = () => {
              </div>
 
              <div className="campo-creacion">
+               <label>Alias Ticket:</label>
+               <input
+                 type="text"
+                 placeholder="Ej: Leche Desc. 1L"
+                 value={datosNuevoProducto.alias_ticket}
+                 onChange={(e) => handleCambiarDatosCreacion("alias_ticket", e.target.value)}
+                 className="input-creacion"
+               />
+             </div>
+
+             <div className="campo-creacion">
                <label>Marca:</label>
                <input
                  type="text"
@@ -781,27 +812,30 @@ const VentasApp = () => {
      )}
      {mostrarResumen && (
       <div className="resumen-venta" ref={resumenRef}>
-        <h2>Resumen de la Venta</h2>
-        <table className="productos-table">
-          <thead>
-            <tr>
-              <th>CANTIDAD</th>
-              <th>PRODUCTO</th>
-              <th>PRECIO</th>
-              <th>IMPORTE</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productos.map((producto, index) => (
-              <tr key={index}>
-                <td className="cantidad-col">{producto.cantidad}</td>
-                <td>{producto.nombre_producto}</td>
-                <td>${producto.precio.toFixed(2)}</td>
-                <td>${producto.subtotal.toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <h2>Ticket De Compra</h2>
+
+        <div className="ticket-header">
+          <span>DETALLE</span>
+          <span className="importe-col">IMPORTE</span>
+        </div>
+
+        <div className="ticket-items">
+          {productos.map((producto, index) => {
+            const alias = producto.alias_ticket && producto.alias_ticket.trim() !== ''
+              ? producto.alias_ticket
+              : producto.nombre_producto;
+            return (
+              <div key={index} className="ticket-item">
+                <div className="ticket-item-name">{alias}</div>
+                <div className="ticket-item-detail">
+                  <span>{producto.cantidad} x ${parseFloat(producto.precio).toFixed(2)}</span>
+                  <span className="importe-col">${parseFloat(producto.subtotal).toFixed(2)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         <div className="resumen-acciones">
           <h3>TOTAL: ${totalVenta.toFixed(2)}</h3>
           <div className="botones-resumen">

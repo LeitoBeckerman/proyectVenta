@@ -36,6 +36,7 @@ def _buscar_por_codigo(codigo_producto):
 
         return JsonResponse({
             'nombre_producto': producto.nombre,
+            'alias_ticket': producto.alias_ticket,
             'precio': precio_producto.monto,
         })
     except Producto.DoesNotExist:
@@ -52,6 +53,7 @@ def _buscar_por_nombre(nombre_producto):
         results.append({
             'id': producto.id,
             'nombre_producto': producto.nombre,
+            'alias_ticket': producto.alias_ticket,
             'codigo_producto': producto.codigo,
             'precio': precio_obj.monto,
             'marca': producto.marca,
@@ -90,6 +92,8 @@ def editar_producto_view(request):
                 producto.marca = data['marca']
             if 'unidad_venta' in data:
                 producto.unidad_venta = data['unidad_venta']
+            if 'alias_ticket' in data:
+                producto.alias_ticket = data['alias_ticket']
 
             producto.save()
 
@@ -109,13 +113,11 @@ def editar_producto_view(request):
                     'id': producto.id,
                     'codigo_producto': producto.codigo,
                     'nombre_producto': producto.nombre,
+                    'alias_ticket': producto.alias_ticket,
                     'marca': producto.marca,
                     'unidad_venta': producto.unidad_venta,
                 }
             })
-
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Datos JSON no válidos'}, status=400)
         except Exception as e:
             print(f"Error al editar producto: {str(e)}")
             return JsonResponse({'error': f'Error interno del servidor: {str(e)}'}, status=500)
@@ -138,6 +140,7 @@ def crear_producto_view(request):
             codigo = data.get('codigo_producto', '').strip()
             nombre = data.get('nombre_producto', '').strip()
             marca = data.get('marca', '').strip()
+            alias_ticket = data.get('alias_ticket', '').strip()
             unidad_venta = data.get('unidad_venta', 'UN')
             precio = data.get('precio', '')
 
@@ -158,6 +161,7 @@ def crear_producto_view(request):
             nuevo_producto = Producto.objects.create(
                 codigo=codigo,
                 nombre=nombre,
+                alias_ticket=alias_ticket,
                 marca=marca,
                 unidad_venta=unidad_venta
             )
@@ -175,6 +179,7 @@ def crear_producto_view(request):
                     'id': nuevo_producto.id,
                     'codigo_producto': nuevo_producto.codigo,
                     'nombre_producto': nuevo_producto.nombre,
+                    'alias_ticket': nuevo_producto.alias_ticket,
                     'marca': nuevo_producto.marca,
                     'unidad_venta': nuevo_producto.unidad_venta,
                     'precio': float(precio),

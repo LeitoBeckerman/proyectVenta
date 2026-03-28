@@ -33,15 +33,19 @@ const buscarProducto = async (codigoProducto, nombreProducto) => {
 const crearNuevoProducto = (data, codigoProducto, cantidad) => {
   if (Array.isArray(data.productos) && data.productos.length > 0) {
     // Si es una búsqueda por nombre, asumimos que el primer resultado es el seleccionado
+    const aliasTicket = data.productos[0].alias_ticket || data.productos[0].nombre_producto || "";
     return {
       ...data.productos[0],
+      alias_ticket: aliasTicket,
       cantidad,
       subtotal: parseFloat(data.productos[0].precio) * (parseFloat(cantidad) || 0),
     };
   } else {
+    const aliasTicket = data.alias_ticket || data.nombre_producto || "";
     return {
       ...data,
       codigo_producto: codigoProducto,
+      alias_ticket: aliasTicket,
       cantidad,
       precio: parseFloat(data.precio),
       subtotal: parseFloat(data.precio) * (parseFloat(cantidad) || 0),

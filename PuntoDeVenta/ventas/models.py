@@ -17,6 +17,7 @@ class Producto(models.Model):
         blank=True   # Permite que en formularios de Django se deje vacío
     )
     nombre = models.CharField(max_length=100)
+    alias_ticket = models.CharField(max_length=100, blank=True, null=True)
     marca = models.CharField(max_length=100, blank=True, null=True)
     # Tu nuevo campo con el nombre que pediste
     unidad_venta = models.CharField(
