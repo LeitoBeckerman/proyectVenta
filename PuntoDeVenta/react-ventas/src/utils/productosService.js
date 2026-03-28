@@ -59,3 +59,49 @@ const actualizarEstado = (nuevoProducto, setProductos, setTotalVenta, setCodigoP
   setCodigoProducto("");
   setCantidad("1");
 };
+
+// Función para buscar productos por nombre en la edición
+export const buscarProductosParaEdicion = async (nombreProducto) => {
+  if (!nombreProducto || nombreProducto.length < 2) {
+    return [];
+  }
+
+  try {
+    const response = await fetch("http://localhost:8000", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ nombre_producto: nombreProducto }),
+    });
+
+    const data = await response.json();
+    return data.productos || [];
+  } catch (error) {
+    console.error('Error al buscar productos:', error);
+    return [];
+  }
+};
+
+// Función para actualizar un producto en la BD
+export const actualizarProducto = async (productoActualizado) => {
+  try {
+    const response = await fetch("http://localhost:8000/editar-producto", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(productoActualizado),
+    });
+
+    const data = await response.json();
+    if (data && !data.error) {
+      return { success: true, mensaje: "Producto actualizado correctamente" };
+    } else {
+      return { success: false, error: data ? data.error : "Error al actualizar el producto" };
+    }
+  } catch (error) {
+    console.error("Error al actualizar producto:", error);
+    return { success: false, error: "Error en la solicitud" };
+  }
+};

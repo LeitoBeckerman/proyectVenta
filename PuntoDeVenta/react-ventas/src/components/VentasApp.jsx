@@ -1,6 +1,6 @@
 import React, { useState, useEffect,useRef} from "react";
 import "./VentasApp.css";
-import { agregarProducto } from "../utils/productosService.js";
+import { agregarProducto, buscarProductosParaEdicion, actualizarProducto } from "../utils/productosService.js";
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import Autosuggest from 'react-autosuggest';
 
@@ -19,6 +19,23 @@ const VentasApp = () => {
   // Nuevo estado para mostrar el resumen y ref para impresión
   const [mostrarResumen, setMostrarResumen] = useState(false);
   const resumenRef = useRef(null);
+
+  // Estados para el modal de edición de productos
+  const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
+  const [productosSearchEdicion, setProductosSearchEdicion] = useState([]);
+  const [busquedaProductoEdicion, setBusquedaProductoEdicion] = useState("");
+  const [productoSeleccionadoEdicion, setProductoSeleccionadoEdicion] = useState(null);
+  const [dataProductoEdicion, setDataProductoEdicion] = useState({
+    id: "",
+    codigo_producto: "",
+    nombre_producto: "",
+    marca: "",
+    unidad_venta: "",
+    precio: "",
+  });
+
+  const [mensajeConfirmacion, setMensajeConfirmacion] = useState("");
+  const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
 
 
   useEffect(() => {
@@ -271,6 +288,92 @@ const VentasApp = () => {
     }, 100);
   };
 
+  // Funciones para el modal de edición de productos
+  const abrirModalEdicion = () => {
+    setMostrarModalEdicion(true);
+    setBusquedaProductoEdicion("");
+    setProductosSearchEdicion([]);
+    setProductoSeleccionadoEdicion(null);
+    setDataProductoEdicion({
+      id: "",
+      codigo_producto: "",
+      nombre_producto: "",
+      marca: "",
+      unidad_venta: "",
+      precio: "",
+    });
+  };
+
+  const cerrarModalEdicion = () => {
+    setMostrarModalEdicion(false);
+    setBusquedaProductoEdicion("");
+    setProductosSearchEdicion([]);
+    setProductoSeleccionadoEdicion(null);
+  };
+
+  const handleBuscarProductosEdicion = async (e) => {
+    const valor = e.target.value;
+    setBusquedaProductoEdicion(valor);
+
+    if (valor.length > 1) {
+      const productos = await buscarProductosParaEdicion(valor);
+      setProductosSearchEdicion(productos);
+    } else {
+      setProductosSearchEdicion([]);
+    }
+  };
+
+  const handleSeleccionarProductoEdicion = (producto) => {
+    setProductoSeleccionadoEdicion(producto);
+    setDataProductoEdicion({
+      id: producto.id || "",
+      codigo_producto: producto.codigo_producto || "",
+      nombre_producto: producto.nombre_producto || "",
+      marca: producto.marca || "",
+      unidad_venta: producto.unidad_venta || "",
+      precio: producto.precio || "",
+    });
+    setProductosSearchEdicion([]);
+  };
+
+  const handleCambiarDatosEdicion = (field, value) => {
+    setDataProductoEdicion(prevData => ({
+      ...prevData,
+      [field]: value,
+    }));
+  };
+
+  const handleGuardarCambios = async () => {
+    if (!productoSeleccionadoEdicion) {
+      alert("Por favor selecciona un producto.");
+      return;
+    }
+
+    // Preguntar confirmación
+    const confirmacion = window.confirm(
+      "¿Estás seguro de que deseas guardar los cambios en este producto?"
+    );
+
+    if (confirmacion) {
+      const resultado = await actualizarProducto(dataProductoEdicion);
+
+      if (resultado.success) {
+        setMensajeConfirmacion("✓ Producto actualizado correctamente");
+        setMostrarConfirmacion(true);
+        setTimeout(() => {
+          setMostrarConfirmacion(false);
+          cerrarModalEdicion();
+        }, 2000);
+      } else {
+        alert("Error: " + resultado.error);
+      }
+    }
+  };
+
+  const handleCancelarEdicion = () => {
+    cerrarModalEdicion();
+  };
+
   return (
     <div className="contenedor-principal">
       <section className="tabla-containersection">
@@ -355,6 +458,9 @@ const VentasApp = () => {
      <button className="boton-escanear" type="button" onClick={iniciarEscaneo}>
        Escanear Código de Barras
      </button>
+     <button className="boton-actualizar" type="button" onClick={abrirModalEdicion}>
+       Actualizar Producto
+     </button>
     <button type="button" onClick={finalizarVenta}>Finalizar Venta</button>
      <button
        className="boton-eliminar"
@@ -371,7 +477,124 @@ const VentasApp = () => {
      {/* Contenedor para mostrar la cámara */}
      <div id="reader"></div>
 
-     {/* Resumen imprimible (aparece en la misma pantalla) */}
+     {/* Modal para editar productos */}
+     {mostrarModalEdicion && (
+       <div className="modal-overlay">
+         <div className="modal-edicion">
+           <div className="modal-header">
+             <h2>Actualizar Producto</h2>
+             <button className="btn-cerrar-modal" onClick={handleCancelarEdicion}>×</button>
+           </div>
+
+           {!productoSeleccionadoEdicion ? (
+             <div className="modal-busqueda">
+               <h3>Buscar Producto</h3>
+               <input
+                 type="text"
+                 placeholder="Escribe el nombre del producto..."
+                 value={busquedaProductoEdicion}
+                 onChange={handleBuscarProductosEdicion}
+                 className="input-busqueda-edicion"
+               />
+               {productosSearchEdicion.length > 0 && (
+                 <div className="lista-productos-edicion">
+                   {productosSearchEdicion.map((producto) => (
+                     <div
+                       key={producto.id}
+                       className="item-producto-edicion"
+                       onClick={() => handleSeleccionarProductoEdicion(producto)}
+                     >
+                       <strong>{producto.nombre_producto}</strong> - {producto.marca}
+                       <br />
+                       <small>Código: {producto.codigo_producto} | Precio: ${producto.precio}</small>
+                     </div>
+                   ))}
+                 </div>
+               )}
+             </div>
+           ) : (
+             <div className="modal-edicion-campos">
+               <h3>Editar Datos del Producto</h3>
+               
+               <div className="campo-edicion">
+                 <label>ID:</label>
+                 <input
+                   type="text"
+                   value={dataProductoEdicion.id}
+                   disabled
+                   className="input-disabled"
+                 />
+               </div>
+
+               <div className="campo-edicion">
+                 <label>Código del Producto:</label>
+                 <input
+                   type="text"
+                   value={dataProductoEdicion.codigo_producto}
+                   onChange={(e) => handleCambiarDatosEdicion("codigo_producto", e.target.value)}
+                 />
+               </div>
+
+               <div className="campo-edicion">
+                 <label>Nombre del Producto:</label>
+                 <input
+                   type="text"
+                   value={dataProductoEdicion.nombre_producto}
+                   onChange={(e) => handleCambiarDatosEdicion("nombre_producto", e.target.value)}
+                 />
+               </div>
+
+               <div className="campo-edicion">
+                 <label>Marca:</label>
+                 <input
+                   type="text"
+                   value={dataProductoEdicion.marca}
+                   onChange={(e) => handleCambiarDatosEdicion("marca", e.target.value)}
+                 />
+               </div>
+
+               <div className="campo-edicion">
+                 <label>Unidad de Venta:</label>
+                 <input
+                   type="text"
+                   value={dataProductoEdicion.unidad_venta}
+                   onChange={(e) => handleCambiarDatosEdicion("unidad_venta", e.target.value)}
+                 />
+               </div>
+
+               <div className="campo-edicion">
+                 <label>Precio:</label>
+                 <input
+                   type="number"
+                   value={dataProductoEdicion.precio}
+                   onChange={(e) => handleCambiarDatosEdicion("precio", e.target.value)}
+                   step="0.01"
+                 />
+               </div>
+
+               <div className="botones-edicion">
+                 <button className="btn-guardar" onClick={handleGuardarCambios}>
+                   Guardar Cambios
+                 </button>
+                 <button className="btn-cancelar" onClick={() => setProductoSeleccionadoEdicion(null)}>
+                   Volver a Buscar
+                 </button>
+                 <button className="btn-cerrar" onClick={handleCancelarEdicion}>
+                   Cancelar
+                 </button>
+               </div>
+             </div>
+           )}
+         </div>
+       </div>
+     )}
+
+     {/* Mensaje de confirmación */}
+     {mostrarConfirmacion && (
+       <div className="confirmacion-banner">
+         {mensajeConfirmacion}
+       </div>
+     )}
      {mostrarResumen && (
       <div className="resumen-venta" ref={resumenRef}>
         <h2>Resumen de la Venta</h2>

@@ -47,11 +47,76 @@ def _buscar_por_nombre(nombre_producto):
         try:
             precio = PrecioProducto.objects.get(producto=producto).monto
             results.append({
+                'id': producto.id,
                 'nombre_producto': producto.nombre,
                 'codigo_producto': producto.codigo,
                 'precio': precio,
-                'marca': producto.marca
+                'marca': producto.marca,
+                'unidad_venta': producto.unidad_venta
             })
         except PrecioProducto.DoesNotExist:
             continue  
     return JsonResponse({'productos': results})
+
+
+# Endpoint para editar un producto existente
+@csrf_exempt  # Desactiva la protección CSRF para permitir PUT desde React
+def editar_producto_view(request):
+    """
+    Maneja solicitudes PUT para editar un producto existente.
+    Actualiza los datos del producto y su precio.
+    """
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            producto_id = data.get('id')
+
+            if not producto_id:
+                return JsonResponse({'error': 'Se requiere el ID del producto'}, status=400)
+
+            # Buscar el producto
+            try:
+                producto = Producto.objects.get(id=producto_id)
+            except Producto.DoesNotExist:
+                return JsonResponse({'error': 'Producto no encontrado'}, status=404)
+
+            # Actualizar los datos del producto
+            if 'codigo_producto' in data and data['codigo_producto']:
+                producto.codigo = data['codigo_producto']
+            if 'nombre_producto' in data and data['nombre_producto']:
+                producto.nombre = data['nombre_producto']
+            if 'marca' in data:
+                producto.marca = data['marca']
+            if 'unidad_venta' in data:
+                producto.unidad_venta = data['unidad_venta']
+
+            producto.save()
+
+            # Actualizar el precio si fue proporcionado
+            if 'precio' in data:
+                nuevo_precio = data['precio']
+                # Crear un nuevo registro de precio (mantiene el historial)
+                PrecioProducto.objects.create(
+                    producto=producto,
+                    monto=nuevo_precio
+                )
+
+            return JsonResponse({
+                'error': None,
+                'mensaje': 'Producto actualizado correctamente',
+                'producto': {
+                    'id': producto.id,
+                    'codigo_producto': producto.codigo,
+                    'nombre_producto': producto.nombre,
+                    'marca': producto.marca,
+                    'unidad_venta': producto.unidad_venta,
+                }
+            })
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Datos JSON no válidos'}, status=400)
+        except Exception as e:
+            print(f"Error al editar producto: {str(e)}")
+            return JsonResponse({'error': f'Error interno del servidor: {str(e)}'}, status=500)
+    
+    return JsonResponse({'error': 'Método no permitido. Use PUT'}, status=405)
