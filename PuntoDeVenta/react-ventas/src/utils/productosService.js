@@ -16,7 +16,7 @@ export const agregarProducto = async (codigoProducto, cantidad, nombreProducto, 
 };
 
 const buscarProducto = async (codigoProducto, nombreProducto) => {
-  const endpoint = "http://localhost:8000";
+  const endpoint = "http://192.168.0.100:8000";
   const body = nombreProducto ? { nombre_producto: nombreProducto } : { codigo_producto: codigoProducto };
   
   const response = await fetch(endpoint, {
@@ -71,7 +71,7 @@ export const buscarProductosParaEdicion = async (nombreProducto) => {
   }
 
   try {
-    const response = await fetch("http://localhost:8000", {
+    const response = await fetch("http://192.168.0.100:8000", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -90,7 +90,7 @@ export const buscarProductosParaEdicion = async (nombreProducto) => {
 // Función para actualizar un producto en la BD
 export const actualizarProducto = async (productoActualizado) => {
   try {
-    const response = await fetch("http://localhost:8000/editar-producto", {
+    const response = await fetch("http://192.168.0.100:8000/editar-producto", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -113,7 +113,7 @@ export const actualizarProducto = async (productoActualizado) => {
 // Función para verificar si un producto ya existe por código
 export const verificarProductoDuplicado = async (codigoProducto) => {
   try {
-    const response = await fetch("http://localhost:8000", {
+    const response = await fetch("http://192.168.0.100:8000", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -133,7 +133,7 @@ export const verificarProductoDuplicado = async (codigoProducto) => {
 // Función para crear un nuevo producto en la BD
 export const crearProductoBD = async (datosProducto) => {
   try {
-    const response = await fetch("http://localhost:8000/crear-producto", {
+    const response = await fetch("http://192.168.0.100:8000/crear-producto", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
