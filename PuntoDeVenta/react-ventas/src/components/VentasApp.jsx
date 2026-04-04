@@ -67,8 +67,9 @@ const VentasApp = () => {
 
   
  // Funciones para el autocompletado
-  // Obtener el valor de la sugerencia
-  const getSuggestionValue = (suggestion) => suggestion.nombre_producto;
+  const getNombreProducto = (item) => item.nombre_producto || item.nombre || "";
+
+  const getSuggestionValue = (suggestion) => getNombreProducto(suggestion);
 
   // Renderizar cada sugerencia con un click para agregarla, muestra la lista
   const renderSuggestion = (suggestion) => (
@@ -81,26 +82,30 @@ const VentasApp = () => {
           inputRef.current.focus();
           setProductName("");  // Limpiar el input de nombre del producto
         }, 0);
-        
-         // Volver a enfocar en el código del producto
-
       }}
       style={{ cursor: "pointer", padding: "5px", borderBottom: "1px solid #ddd" }}
     >
-      {suggestion.alias_ticket ? suggestion.alias_ticket : suggestion.nombre_producto} - {suggestion.marca} - ${suggestion.precio}
+      {suggestion.nombre || suggestion.nombre_producto} - {suggestion.marca} - ${suggestion.precio}
     </div>
   );
 
 // Manejar la selección de una sugerencia y agregarla a la tabla
   const handleSuggestionSelected = (suggestion) => {
     const nuevaCantidad = isNaN(parseFloat(cantidad)) ? 1 : parseFloat(cantidad);
+    const nombreBase = getNombreProducto(suggestion);
     const alias = suggestion.alias_ticket && suggestion.alias_ticket.trim() !== ''
       ? suggestion.alias_ticket
-      : suggestion.nombre_producto;
+      : nombreBase;
+    const nombreConMarca = suggestion.marca
+      ? `${nombreBase} ${suggestion.marca}`.trim()
+      : nombreBase;
+
     const nuevoProducto = {
-      codigo_producto: suggestion.codigo_producto,
+      codigo_producto: suggestion.codigo_producto || suggestion.codigo || "",
       cantidad: nuevaCantidad,
-      nombre_producto: suggestion.nombre_producto+' '+suggestion.marca,
+      nombre_producto: suggestion.alias_ticket || nombreConMarca,
+      nombre: suggestion.nombre || suggestion.nombre_producto || "",
+      marca: suggestion.marca || "",
       alias_ticket: alias,
       precio: parseFloat(suggestion.precio),
       subtotal: nuevaCantidad * parseFloat(suggestion.precio),
@@ -121,7 +126,7 @@ const VentasApp = () => {
  const onSuggestionsFetchRequested = async ({ value }) => {
    if (value.length > 1) { // Solo buscar si hay al menos 2 caracteres
      try {
-       const response = await fetch("http://192.168.0.100:8000", {
+       const response = await fetch("http://192.168.0.103:8000", {
          method: 'POST',
          headers: {
            'Content-Type': 'application/json',
@@ -152,17 +157,15 @@ const VentasApp = () => {
    setProductName(newValue);
      // Filtrar sugerencias sin importar mayúsculas/minúsculas
   const lowerValue = newValue.toLowerCase();
-  const filteredSuggestions = suggestions.filter(suggestion =>
-    (suggestion.nombre_producto && suggestion.nombre_producto.toLowerCase().includes(lowerValue)) ||
-    (suggestion.alias_ticket && suggestion.alias_ticket.toLowerCase().includes(lowerValue))
-  );
+  const filteredSuggestions = suggestions.filter(suggestion => {
+    const suggestionNombre = getNombreProducto(suggestion).toLowerCase();
+    return (
+      suggestionNombre.includes(lowerValue) ||
+      (suggestion.alias_ticket && suggestion.alias_ticket.toLowerCase().includes(lowerValue))
+    );
+  });
   setSuggestions(filteredSuggestions);
-};
-
-
-
-
-
+ };
 
 
   // Función para manejar el escaneo de código de barras
@@ -221,15 +224,19 @@ const VentasApp = () => {
     try {
       if (productName) { // Si estamos usando el autocompletado
         const lowerValue = productName.toLowerCase();
-        const selectedProduct = suggestions.find(s =>
-          s.nombre_producto.toLowerCase() === lowerValue ||
-          (s.alias_ticket && s.alias_ticket.toLowerCase() === lowerValue)
-        );
+        const selectedProduct = suggestions.find(s => {
+          const suggestionNombre = getNombreProducto(s).toLowerCase();
+          return (
+            suggestionNombre === lowerValue ||
+            (s.alias_ticket && s.alias_ticket.toLowerCase() === lowerValue)
+          );
+        });
         if (selectedProduct) {
+          const nombreProductoSeleccionado = getNombreProducto(selectedProduct);
           const resultado = await agregarProducto(
-            selectedProduct.codigo_producto,
+            selectedProduct.codigo_producto || selectedProduct.codigo,
             cantidad,
-            selectedProduct.nombre_producto,
+            nombreProductoSeleccionado,
             setProductos,
             setTotalVenta,
             () => {setCodigoProducto(""); setProductName("");},
@@ -508,7 +515,7 @@ const VentasApp = () => {
                     className="input-cantidad"
                   />
                 </td>
-                <td>{producto.nombre_producto}</td>
+                <td>{producto.nombre ? `${producto.nombre} ${producto.marca}` : producto.nombre_producto}</td>
                 <td>${producto.precio.toFixed(2)}</td>
                 <td>${producto.subtotal.toFixed(2)}</td>
               </tr>

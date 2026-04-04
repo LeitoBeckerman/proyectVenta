@@ -16,7 +16,7 @@ export const agregarProducto = async (codigoProducto, cantidad, nombreProducto, 
 };
 
 const buscarProducto = async (codigoProducto, nombreProducto) => {
-  const endpoint = "http://192.168.0.100:8000";
+  const endpoint = "http://192.168.0.103:8000";
   const body = nombreProducto ? { nombre_producto: nombreProducto } : { codigo_producto: codigoProducto };
   
   const response = await fetch(endpoint, {
@@ -31,26 +31,26 @@ const buscarProducto = async (codigoProducto, nombreProducto) => {
 };
 
 const crearNuevoProducto = (data, codigoProducto, cantidad) => {
-  if (Array.isArray(data.productos) && data.productos.length > 0) {
-    // Si es una búsqueda por nombre, asumimos que el primer resultado es el seleccionado
-    const aliasTicket = data.productos[0].alias_ticket || data.productos[0].nombre_producto || "";
-    return {
-      ...data.productos[0],
-      alias_ticket: aliasTicket,
-      cantidad,
-      subtotal: parseFloat(data.productos[0].precio) * (parseFloat(cantidad) || 0),
-    };
-  } else {
-    const aliasTicket = data.alias_ticket || data.nombre_producto || "";
-    return {
-      ...data,
-      codigo_producto: codigoProducto,
-      alias_ticket: aliasTicket,
-      cantidad,
-      precio: parseFloat(data.precio),
-      subtotal: parseFloat(data.precio) * (parseFloat(cantidad) || 0),
-    };
-  }
+  const producto = Array.isArray(data.productos) && data.productos.length > 0
+    ? data.productos[0]
+    : data;
+
+  const nombreBase = producto.nombre_producto || producto.nombre || "";
+  const codigoReal = producto.codigo_producto || producto.codigo || codigoProducto;
+  const aliasTicket = producto.alias_ticket || nombreBase || "";
+  const nombreConMarca = producto.marca
+    ? `${nombreBase} ${producto.marca}`.trim()
+    : nombreBase;
+
+  return {
+    ...producto,
+    codigo_producto: codigoReal,
+    nombre_producto: producto.alias_ticket || nombreConMarca,
+    alias_ticket: aliasTicket,
+    cantidad,
+    precio: parseFloat(producto.precio),
+    subtotal: parseFloat(producto.precio) * (parseFloat(cantidad) || 0),
+  };
 };
 
 const actualizarEstado = (nuevoProducto, setProductos, setTotalVenta, setCodigoProducto, setCantidad) => {
@@ -71,7 +71,7 @@ export const buscarProductosParaEdicion = async (nombreProducto) => {
   }
 
   try {
-    const response = await fetch("http://192.168.0.100:8000", {
+    const response = await fetch("http://192.168.0.103:8000", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -90,7 +90,7 @@ export const buscarProductosParaEdicion = async (nombreProducto) => {
 // Función para actualizar un producto en la BD
 export const actualizarProducto = async (productoActualizado) => {
   try {
-    const response = await fetch("http://192.168.0.100:8000/editar-producto", {
+    const response = await fetch("http://192.168.0.103:8000/editar-producto", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -113,7 +113,7 @@ export const actualizarProducto = async (productoActualizado) => {
 // Función para verificar si un producto ya existe por código
 export const verificarProductoDuplicado = async (codigoProducto) => {
   try {
-    const response = await fetch("http://192.168.0.100:8000", {
+    const response = await fetch("http://192.168.0.103:8000", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -133,7 +133,7 @@ export const verificarProductoDuplicado = async (codigoProducto) => {
 // Función para crear un nuevo producto en la BD
 export const crearProductoBD = async (datosProducto) => {
   try {
-    const response = await fetch("http://192.168.0.100:8000/crear-producto", {
+    const response = await fetch("http://192.168.0.103:8000/crear-producto", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

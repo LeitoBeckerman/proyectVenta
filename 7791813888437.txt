@@ -22,6 +22,30 @@ python manage.py migrate
 python manage.py runserver
 
 
+
+Mi consejo para ahora:
+
+No te compliques con HTTPS y server.js todavía.
+
+    Corré Django con python manage.py runserver 0.0.0.0:8000.
+
+    Corré React con npm start.
+
+    Desde la notebook entrá a http://192.168.0.100:3000 (HTTP normal, sin la S).
+
+Server Name: Mi Proyecto Docker (Es solo un nombre para que lo reconozcas vos).
+
+Host name/address: localhost
+
+Port: 5432
+
+Database: FacturacionDB (O el nombre que le pusiste en el settings.py de Django).
+
+User: postgres
+
+Password: Becker123
+
+
 {
     "productos": [
         {

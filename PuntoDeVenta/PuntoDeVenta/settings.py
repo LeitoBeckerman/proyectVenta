@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-!!x*lb12kp6znzvu3a@ghyr24&_1cp+(9y4b&xohikq76ca9rp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.100', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['192.168.0.103', 'localhost', '127.0.0.1']
 
 # Configuración de CSRF
 CSRF_COOKIE_HTTPONLY = False  # Permite que el cliente lea la cookie desde JavaScript
